@@ -2,9 +2,9 @@ import { useState, useRef } from "react";
 import Header from "../components/layout/Header";
 import { products } from "../data/mockData";
 import { useReactToPrint } from "react-to-print";
-import Ticket from "../components/Ticket";
+import Ticket from "../components/layout/Ticket";
 
-export default function POS() {
+const POS=() =>{
 
   const [cart, setCart] = useState([]);
 
@@ -67,7 +67,6 @@ export default function POS() {
       setCart(cart.filter(item => item.id !== id));
 
     } else {
-
       const updated = cart.map(item =>
         item.id === id
           ? {
@@ -348,17 +347,18 @@ export default function POS() {
         </div>
 
       )}
-      <div className="hidden">
-  <Ticket
+      <Ticket
     ref={ticketRef}
     cart={cart}
     total={total}
     paymentMethod={paymentMethod}
     cash={cash}
     change={change}
+    item={cart[0]}
   />
-</div>
 
     </div>
   )
-}
+};
+
+export default POS;

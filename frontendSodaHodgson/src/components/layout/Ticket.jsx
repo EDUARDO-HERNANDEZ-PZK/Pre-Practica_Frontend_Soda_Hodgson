@@ -1,7 +1,6 @@
 import React from "react";
 
-const Ticket = React.forwardRef(({ cart, total, paymentMethod, cash, change }, ref) => {
-
+const Ticket = React.forwardRef(({ cart, total, paymentMethod, cash, change, itemInput }, ref) => {
   const date = new Date();
 
   const invoiceNumber = Math.floor(Math.random() * 100000);
