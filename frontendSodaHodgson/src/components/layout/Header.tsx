@@ -1,4 +1,10 @@
-export default function Header({ title }) {
+import React from "react";
+
+export interface HeaderProps {
+  title: string;
+}
+
+const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <div className="bg-white p-6 rounded-3xl shadow flex items-center justify-between">
 
@@ -19,3 +25,5 @@ export default function Header({ title }) {
     </div>
   )
 }
+
+export default Header;

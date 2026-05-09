@@ -1,120 +1,130 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Header from "../components/layout/Header";
 import { products } from "../data/mockData";
 import { useReactToPrint } from "react-to-print";
 import Ticket from "../components/layout/Ticket";
+import { InvoiceDetail } from "../models/Cart";
+import { Product } from "../models/Product";
 
-const POS=() =>{
-
-  const [cart, setCart] = useState([]);
+const POS: React.FC = () => {
+  const [cart, setCart] = useState<InvoiceDetail[]>([]);
 
   const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
-  const [cash, setCash] = useState("");
+  const [cash, setCash] = useState<number>(0);
 
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
-  
-  const ticketRef = useRef();
+
+  const [showTicket, setShowTicket] = useState(false);
+
+  const [productList, setProductList] = useState(products);
+
+  const [ticketData, setTicketData] = useState<{
+    cart: InvoiceDetail[];
+    total: number;
+    paymentMethod: string;
+    cash: number;
+    change: number;
+  } | null>(null);
 
   // FILTRAR PRODUCTOS
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(search.toLowerCase())
+  const filteredProducts = productList.filter((product) =>
+    product.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   // AGREGAR PRODUCTO
-  const addProduct = (product) => {
-
-    const existing = cart.find(item => item.id === product.id);
+  const addProduct = (product: Product) => {
+    const existing = cart.find((item) => item.id === product.id);
 
     if (existing) {
-
-      const updated = cart.map(item =>
+      const updated = cart.map((item) =>
         item.id === product.id
           ? {
               ...item,
-              qty: item.qty + 1,
-              subtotal: (item.qty + 1) * item.price
+              quantity: item.quantity + 1,
+              subtotal: (item.quantity + 1) * item.product.price,
             }
-          : item
+          : item,
       );
 
       setCart(updated);
-
     } else {
-
       setCart([
         ...cart,
         {
           ...product,
-          qty: 1,
-          subtotal: product.price
-        }
+          quantity: 1,
+          subtotal: product.price,
+          product: product,
+        },
       ]);
-
     }
 
+    setProductList((prev) =>
+      prev.map((p) => (p.id === product.id ? { ...p, stock: p.stock - 1 } : p)),
+    );
   };
 
   // ELIMINAR PRODUCTO
-  const removeProduct = (id) => {
+  const removeProduct = (id: string) => {
+    const existing = cart.find((item) => item.id === id);
 
-    const existing = cart.find(item => item.id === id);
-
-    if (existing.qty === 1) {
-
-      setCart(cart.filter(item => item.id !== id));
-
+    if (existing?.quantity === 1) {
+      setCart(cart.filter((item) => item.id !== id));
     } else {
-      const updated = cart.map(item =>
+      const updated = cart.map((item) =>
         item.id === id
           ? {
               ...item,
-              qty: item.qty - 1,
-              subtotal: (item.qty - 1) * item.price
+              quantity: item.quantity - 1,
+              subtotal: (item.quantity - 1) * item.product.price,
             }
-          : item
+          : item,
       );
 
       setCart(updated);
-
     }
 
+    setProductList((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, stock: p.stock + 1 } : p)),
+    );
   };
 
   // TOTAL
-  const total = cart.reduce(
-    (acc, item) => acc + item.subtotal,
-    0
-  );
+  const total = cart.reduce((acc, item) => acc + item.subtotal, 0);
 
   // CAMBIO
   const change = cash ? cash - total : 0;
 
-  const handlePrint = useReactToPrint({
-  contentRef: () => ticketRef,
-});
+  const handlePrint = () => {
+    setShowTicket(true);
+  };
 
   // FINALIZAR VENTA
   const finishSale = () => {
+    setTicketData({
+      cart,
+      total,
+      paymentMethod,
+      cash,
+      change,
+    });
 
-    handlePrint();
+    setShowTicket(true);
 
     setCart([]);
-    setCash("");
+    setCash(0);
     setShowModal(false);
-
   };
 
   return (
     <div className="p-8 w-full">
-
       <Header title="Caja Registradora" />
 
       {/* SEARCH */}
       <div className="mt-6">
-
         <input
           type="text"
           placeholder="Buscar producto..."
@@ -122,63 +132,49 @@ const POS=() =>{
           onChange={(e) => setSearch(e.target.value)}
           className="w-full bg-white rounded-3xl shadow p-5 outline-none"
         />
-
       </div>
 
       {/* PRODUCTOS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-
-        {filteredProducts.map(product => (
-
+        {filteredProducts.map((product) => (
           <div
             key={product.id}
             className="bg-white rounded-3xl shadow hover:shadow-xl transition overflow-hidden"
           >
-
             <img
-              src={product.image}
+              src={product.imageUrl}
               alt={product.name}
               className="w-full h-52 object-cover"
             />
 
             <div className="p-5">
+              <h2 className="text-2xl font-bold">{product.name}</h2>
 
-              <h2 className="text-2xl font-bold">
-                {product.name}
-              </h2>
+              <p className="text-slate-500 mt-2">Stock: {product.stock}</p>
 
-              <p className="text-slate-500 mt-2">
-                Stock: {product.stock}
-              </p>
-
-              <h3 className="text-3xl font-bold mt-4">
-                C$ {product.price}
-              </h3>
+              <h3 className="text-3xl font-bold mt-4">C$ {product.price}</h3>
 
               <button
                 onClick={() => addProduct(product)}
-                className="bg-blue-600 text-white w-full mt-5 p-3 rounded-2xl font-semibold hover:bg-blue-700 transition"
+                className={`w-full mt-5 p-3 rounded-2xl font-semibold transition ${
+                  product.stock <= 0
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
+                disabled={product.stock <= 0}
               >
-                Agregar
+                {product.stock <= 0 ? "Sin Stock" : "Agregar"}
               </button>
-
             </div>
-
           </div>
-
         ))}
-
       </div>
 
       {/* CARRITO */}
       <div className="bg-white rounded-3xl shadow p-6 mt-8">
-
-        <h2 className="text-3xl font-bold mb-6">
-          Carrito
-        </h2>
+        <h2 className="text-3xl font-bold mb-6">Carrito</h2>
 
         <table className="w-full">
-
           <thead className="bg-slate-100">
             <tr>
               <th className="p-4 text-left">Producto</th>
@@ -189,29 +185,18 @@ const POS=() =>{
           </thead>
 
           <tbody>
-
-            {cart.map(item => (
-
+            {cart.map((item) => (
               <tr key={item.id} className="border-t">
+                <td className="p-4">{item.product.name}</td>
+
+                <td className="p-4">{item.quantity}</td>
+
+                <td className="p-4">C$ {item.subtotal}</td>
 
                 <td className="p-4">
-                  {item.name}
-                </td>
-
-                <td className="p-4">
-                  {item.qty}
-                </td>
-
-                <td className="p-4">
-                  C$ {item.subtotal}
-                </td>
-
-                <td className="p-4">
-
                   <div className="flex gap-2">
-
                     <button
-                      onClick={() => addProduct(item)}
+                      onClick={() => addProduct(item.product)}
                       className="bg-green-600 text-white px-4 py-2 rounded-xl"
                     >
                       +
@@ -223,32 +208,19 @@ const POS=() =>{
                     >
                       -
                     </button>
-
                   </div>
-
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
 
         {/* TOTAL */}
         <div className="bg-slate-100 rounded-3xl p-6 mt-6 flex items-center justify-between">
-
           <div>
+            <p className="text-slate-500">Total</p>
 
-            <p className="text-slate-500">
-              Total
-            </p>
-
-            <h2 className="text-5xl font-bold">
-              C$ {total}
-            </h2>
-
+            <h2 className="text-5xl font-bold">C$ {total}</h2>
           </div>
 
           <button
@@ -257,27 +229,17 @@ const POS=() =>{
           >
             Cobrar
           </button>
-
         </div>
-
       </div>
 
       {/* MODAL */}
       {showModal && (
-
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-
           <div className="bg-white rounded-3xl p-8 w-[450px]">
-
-            <h2 className="text-3xl font-bold">
-              Finalizar Venta
-            </h2>
+            <h2 className="text-3xl font-bold">Finalizar Venta</h2>
 
             <div className="mt-6">
-
-              <label className="font-semibold">
-                Método de Pago
-              </label>
+              <label className="font-semibold">Método de Pago</label>
 
               <select
                 value={paymentMethod}
@@ -288,44 +250,32 @@ const POS=() =>{
                 <option>Transferencia</option>
                 <option>Tarjeta</option>
               </select>
-
             </div>
 
             <div className="mt-4">
-
-              <label className="font-semibold">
-                Dinero Recibido
-              </label>
+              <label className="font-semibold">Dinero Recibido</label>
 
               <input
                 type="number"
                 value={cash}
-                onChange={(e) => setCash(e.target.value)}
+                onChange={(e) => setCash(Number(e.target.value))}
                 className="w-full border rounded-2xl p-4 mt-2"
               />
-
             </div>
 
             <div className="bg-slate-100 rounded-3xl p-5 mt-6">
-
               <div className="flex justify-between">
                 <span>Total:</span>
-                <span className="font-bold">
-                  C$ {total}
-                </span>
+                <span className="font-bold">C$ {total}</span>
               </div>
 
               <div className="flex justify-between mt-3">
                 <span>Cambio:</span>
-                <span className="font-bold text-green-600">
-                  C$ {change}
-                </span>
+                <span className="font-bold text-green-600">C$ {change}</span>
               </div>
-
             </div>
 
             <div className="flex gap-3 mt-6">
-
               <button
                 onClick={() => setShowModal(false)}
                 className="bg-slate-300 w-full p-4 rounded-2xl font-bold"
@@ -339,26 +289,51 @@ const POS=() =>{
               >
                 Finalizar
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-      <Ticket
-    ref={ticketRef}
-    cart={cart}
-    total={total}
-    paymentMethod={paymentMethod}
-    cash={cash}
-    change={change}
-    item={cart[0]}
-  />
+      {showTicket && ticketData && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative">
+            {/* BOTÓN CERRAR */}
+            <button
+              onClick={() => setShowTicket(false)}
+              className="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full font-bold hover:bg-red-600"
+            >
+              X
+            </button>
 
+            {/* TICKET */}
+            <Ticket
+              cart={ticketData.cart}
+              total={ticketData.total}
+              paymentMethod={ticketData.paymentMethod}
+              cash={ticketData.cash}
+              change={ticketData.change}
+            />
+
+            {/* BOTONES */}
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() => window.print()}
+                className="bg-blue-600 text-white w-full p-4 rounded-2xl font-bold hover:bg-blue-700"
+              >
+                Imprimir
+              </button>
+
+              <button
+                onClick={() => setShowTicket(false)}
+                className="bg-slate-300 w-full p-4 rounded-2xl font-bold"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 };
 
 export default POS;

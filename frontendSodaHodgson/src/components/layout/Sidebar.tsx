@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import React from "react";
 
-export default function Sidebar() {
+const Sidebar: React.FC = () => {
   return (
     <div className="w-72 min-h-screen bg-slate-900 text-white p-6">
 
@@ -43,3 +44,5 @@ export default function Sidebar() {
     </div>
   )
 }
+
+export default Sidebar;
