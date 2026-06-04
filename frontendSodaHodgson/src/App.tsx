@@ -6,12 +6,13 @@ import Dashboard from "./pages/Dashboard";
 import POS from "./pages/POS";
 import Inventory from "./pages/Inventory";
 import Users from "./pages/Users";
+import Tables from "./pages/Tables";
 
 export default function App() {
   return (
     <BrowserRouter>
 
-      <div className="flex">
+      <div className="flex flex-col md:flex-row bg-slate-100 min-h-screen">
 
         <Sidebar />
 
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/pos" element={<POS />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/tables" element={<Tables />} />
         </Routes>
 
       </div>

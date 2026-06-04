@@ -1,6 +1,6 @@
 export default function Dashboard() {
   return (
-    <div className="min-h-screen bg-slate-100 p-8">
+    <div className="w-full bg-slate-100 p-4 md:p-8">
 
       {/* HEADER */}
       <div className="bg-slate-900 text-white p-6 rounded-3xl shadow-xl">
@@ -14,7 +14,7 @@ export default function Dashboard() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
 
         <div className="bg-white p-5 rounded-3xl shadow">
           <p className="text-slate-500">Ventas Hoy</p>
@@ -130,7 +130,7 @@ export default function Dashboard() {
         </div>
 
         {/* TOTAL */}
-        <div className="bg-slate-100 rounded-3xl p-6 mt-6 flex items-center justify-between">
+        <div className="bg-slate-100 rounded-3xl p-6 mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
 
           <div>
             <p className="text-slate-500">

@@ -5,9 +5,13 @@ import { useReactToPrint } from "react-to-print";
 import Ticket from "../components/layout/Ticket";
 import { InvoiceDetail } from "../models/Cart";
 import { Product } from "../models/Product";
+import { tables } from "../data/tables";
+import { orders } from "../data/orders";
 
 const POS: React.FC = () => {
   const [cart, setCart] = useState<InvoiceDetail[]>([]);
+
+  const [selectedTable, setSelectedTable] = useState<number | null>(null);
 
   const [search, setSearch] = useState("");
 
@@ -36,6 +40,10 @@ const POS: React.FC = () => {
 
   // AGREGAR PRODUCTO
   const addProduct = (product: Product) => {
+    if (!selectedTable) {
+  alert("Seleccione una mesa primero");
+  return;
+}
     const existing = cart.find((item) => item.id === product.id);
 
     if (existing) {
@@ -103,43 +111,86 @@ const POS: React.FC = () => {
   };
 
   // FINALIZAR VENTA
-  const finishSale = () => {
-    setTicketData({
-      cart,
-      total,
-      paymentMethod,
-      cash,
-      change,
-    });
+const finishSale = () => {
 
-    setShowTicket(true);
+  orders.push({
+    tableId: selectedTable,
+    items: cart,
+    total,
+    date: new Date(),
+  });
 
-    setCart([]);
-    setCash(0);
-    setShowModal(false);
-  };
+  setTicketData({
+    cart,
+    total,
+    paymentMethod,
+    cash,
+    change,
+  });
+
+  setShowTicket(true);
+
+  setCart([]);
+  setSelectedTable(null);
+  setCash(0);
+  setShowModal(false);
+};
 
   return (
-    <div className="p-8 w-full">
+    <div className="p-4 md:p-8 w-full">
       <Header title="Caja Registradora" />
 
-      {/* SEARCH */}
-      <div className="mt-6">
-        <input
-          type="text"
-          placeholder="Buscar producto..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-white rounded-3xl shadow p-5 outline-none"
-        />
-      </div>
+      {/* SELECCIONAR MESA */}
 
+<div className="bg-white rounded-3xl shadow p-6 mb-6">
+
+  <h2 className="text-2xl font-bold mb-4">
+    Mesa Seleccionada
+  </h2>
+
+  <select
+    value={selectedTable || ""}
+    onChange={(e) => setSelectedTable(Number(e.target.value))}
+    className="w-full p-4 border rounded-2xl"
+  >
+    <option value="">
+      Seleccionar Mesa
+    </option>
+
+    {tables.map((table) => (
+      <option
+        key={table.id}
+        value={table.id}
+      >
+        Mesa {table.number}
+      </option>
+    ))}
+  </select>
+
+</div>
       {/* PRODUCTOS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+      <div className="
+grid
+grid-cols-1
+sm:grid-cols-2
+lg:grid-cols-3
+xl:grid-cols-4
+gap-6
+mt-6
+">
         {filteredProducts.map((product) => (
           <div
             key={product.id}
-            className="bg-white rounded-3xl shadow hover:shadow-xl transition overflow-hidden"
+            className="
+bg-white
+rounded-3xl
+shadow-lg
+hover:shadow-2xl
+hover:-translate-y-1
+transition-all
+duration-300
+overflow-hidden
+"
           >
             <img
               src={product.imageUrl}
@@ -159,7 +210,7 @@ const POS: React.FC = () => {
                 className={`w-full mt-5 p-3 rounded-2xl font-semibold transition ${
                   product.stock <= 0
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-cyan-500 hover:bg-cyan-600 text-white"
                 }`}
                 disabled={product.stock <= 0}
               >
@@ -171,10 +222,32 @@ const POS: React.FC = () => {
       </div>
 
       {/* CARRITO */}
-      <div className="bg-white rounded-3xl shadow p-6 mt-8">
-        <h2 className="text-3xl font-bold mb-6">Carrito</h2>
+{/* CARRITO */}
+<div className="
+bg-white
+rounded-3xl
+shadow-xl
+p-6
+mt-8
+border
+border-slate-100
+">
 
-        <table className="w-full">
+  <div className="flex justify-between items-center mb-6">
+
+    <h2 className="text-3xl font-bold">
+      Pedido
+    </h2>
+
+    {selectedTable && (
+      <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-semibold">
+        Mesa {selectedTable}
+      </span>
+    )}
+
+  </div>
+
+  <table className="w-full">
           <thead className="bg-slate-100">
             <tr>
               <th className="p-4 text-left">Producto</th>
@@ -216,7 +289,9 @@ const POS: React.FC = () => {
         </table>
 
         {/* TOTAL */}
-        <div className="bg-slate-100 rounded-3xl p-6 mt-6 flex items-center justify-between">
+        <div className="bg-gradient-to-r
+from-cyan-50
+to-blue-50 rounded-3xl p-6 mt-6 flex items-center justify-between">
           <div>
             <p className="text-slate-500">Total</p>
 
@@ -225,7 +300,9 @@ const POS: React.FC = () => {
 
           <button
             onClick={() => setShowModal(true)}
-            className="bg-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-green-700 transition"
+            className="bg-gradient-to-r
+from-emerald-500
+to-green-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-green-700 transition"
           >
             Cobrar
           </button>
