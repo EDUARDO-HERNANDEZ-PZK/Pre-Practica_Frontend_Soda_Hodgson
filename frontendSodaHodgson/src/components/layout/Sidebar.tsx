@@ -3,113 +3,156 @@ import React from "react";
 
 const Sidebar: React.FC = () => {
   return (
-    <div className="
-w-full
-md:w-72
-min-h-auto
-md:min-h-screen
-bg-slate-900
-text-white
-p-6
-">
-      <h1 className="text-3xl font-bold mb-10">
-        Soda Hodgson
-      </h1>
+    <aside
+      className="
+      w-full
+      md:w-72
+      md:min-h-screen
+      bg-gradient-to-b
+      from-slate-900
+      to-slate-800
+      text-white
+      p-6
+      shadow-2xl
+      "
+    >
+      {/* LOGO */}
 
-      <nav className="space-y-4">
+      <div className="mb-10">
+
+        <h1 className="text-3xl font-extrabold tracking-wide">
+          Soda
+        </h1>
+
+        <p className="text-cyan-400 text-lg font-semibold">
+          Hodgson POS
+        </p>
+
+      </div>
+
+      {/* MENU */}
+
+      <nav className="flex flex-col gap-4">
 
         <Link
           to="/"
           className="
-block
-bg-slate-800
-hover:bg-cyan-500
-transition-all
-duration-300
-p-4
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-"
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
         >
-          Dashboard
-        </Link>
-
-        <Link
-          to="/tables"
-        className="
-block
-bg-slate-800
-hover:bg-cyan-500
-transition-all
-duration-300
-p-4
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-"
-        >
-          Mesas
+          📊 Dashboard
         </Link>
 
         <Link
           to="/pos"
           className="
-block
-bg-slate-800
-hover:bg-cyan-500
-transition-all
-duration-300
-p-4
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-"
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
         >
-          Caja POS
+          💳 Caja POS
+        </Link>
+
+        <Link
+          to="/tables"
+          className="
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
+        >
+          🍽 Mesas
+        </Link>
+
+        <Link
+          to="/products"
+          className="
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
+        >
+          🍔 Productos
         </Link>
 
         <Link
           to="/inventory"
-         className="
-block
-bg-slate-800
-hover:bg-cyan-500
-transition-all
-duration-300
-p-4
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-"
+          className="
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
         >
-          Inventario
+          📦 Inventario
         </Link>
 
         <Link
           to="/users"
           className="
-block
-bg-slate-800
-hover:bg-cyan-500
-transition-all
-duration-300
-p-4
-rounded-2xl
-font-semibold
-shadow-lg
-hover:scale-105
-"
+          bg-slate-800
+          hover:bg-cyan-600
+          p-4
+          rounded-2xl
+          transition-all
+          duration-300
+          font-semibold
+          shadow-lg
+          hover:translate-x-1
+          "
         >
-          Usuarios
+          👤 Usuarios
         </Link>
 
       </nav>
-    </div>
+
+      {/* FOOTER */}
+
+      <div className="mt-12 border-t border-slate-700 pt-6">
+
+        <p className="text-sm text-slate-400">
+          Sistema de Gestión
+        </p>
+
+        <p className="font-bold text-cyan-400">
+          Versión 1.0
+        </p>
+
+      </div>
+
+    </aside>
   );
 };
 

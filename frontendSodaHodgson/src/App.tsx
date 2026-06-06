@@ -7,6 +7,7 @@ import POS from "./pages/POS";
 import Inventory from "./pages/Inventory";
 import Users from "./pages/Users";
 import Tables from "./pages/Tables";
+import Products from "./pages/Products";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/users" element={<Users />} />
           <Route path="/tables" element={<Tables />} />
+          <Route path="/products" element={<Products />} />
         </Routes>
 
       </div>
