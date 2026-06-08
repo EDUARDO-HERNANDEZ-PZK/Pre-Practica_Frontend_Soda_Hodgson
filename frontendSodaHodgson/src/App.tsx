@@ -1,33 +1,138 @@
+import { ReactNode } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import Sidebar from "./components/layout/Sidebar";
 
+import Sidebar from "./components/layout/Sidebar";
+import ProtectedRoute from "./components/layout/ProtectedRoute";
+
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import POS from "./pages/POS";
 import Inventory from "./pages/Inventory";
 import Users from "./pages/Users";
 import Tables from "./pages/Tables";
 import Products from "./pages/Products";
+import Orders from "./pages/Orders";
+import Cash from "./pages/Cash";
+interface LayoutProps {
+  children: ReactNode;
+}
+
+function Layout({ children }: LayoutProps) {
+  return (
+    <div className="flex flex-col md:flex-row bg-slate-100 min-h-screen">
+      <Sidebar />
+      <div className="flex-1">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
+
   return (
+
     <BrowserRouter>
 
-      <div className="flex flex-col md:flex-row bg-slate-100 min-h-screen">
+      <Routes>
 
-        <Sidebar />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/pos" element={<POS />} />
-          <Route path="/inventory" element={<Inventory />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/tables" element={<Tables />} />
-          <Route path="/products" element={<Products />} />
-        </Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
 
-      </div>
+        <Route
+          path="/pos"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <POS />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Products />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Inventory />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Users />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/tables"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Tables />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Orders />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+  path="/cash"
+  element={
+    <ProtectedRoute>
+      <Layout>
+        <Cash />
+      </Layout>
+    </ProtectedRoute>
+  }
+/>
+
+      </Routes>
 
     </BrowserRouter>
-  )
+
+  );
+
 }

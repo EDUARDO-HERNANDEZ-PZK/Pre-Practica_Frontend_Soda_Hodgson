@@ -32,112 +32,155 @@ const Sidebar: React.FC = () => {
 
       {/* MENU */}
 
-      <nav className="flex flex-col gap-4">
+    <nav className="flex flex-col gap-4">
 
-        <Link
-          to="/"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          📊 Dashboard
-        </Link>
+  <Link
+    to="/"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    📊 Dashboard
+  </Link>
 
-        <Link
-          to="/pos"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          💳 Caja POS
-        </Link>
+  <Link
+    to="/pos"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    💳 Caja POS
+  </Link>
 
-        <Link
-          to="/tables"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          🍽 Mesas
-        </Link>
+  <Link
+    to="/tables"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    🍽 Mesas
+  </Link>
 
-        <Link
-          to="/products"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          🍔 Productos
-        </Link>
+  <Link
+    to="/products"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    🍔 Productos
+  </Link>
 
-        <Link
-          to="/inventory"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          📦 Inventario
-        </Link>
+  <Link
+    to="/inventory"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    📦 Inventario
+  </Link>
 
-        <Link
-          to="/users"
-          className="
-          bg-slate-800
-          hover:bg-cyan-600
-          p-4
-          rounded-2xl
-          transition-all
-          duration-300
-          font-semibold
-          shadow-lg
-          hover:translate-x-1
-          "
-        >
-          👤 Usuarios
-        </Link>
+  <Link
+    to="/cash"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    💵 Caja
+  </Link>
 
-      </nav>
+  <Link
+    to="/users"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    👤 Usuarios
+  </Link>
 
+</nav>
+<button
+
+  onClick={() => {
+
+    localStorage.removeItem("user");
+
+    window.location.href = "/login";
+
+  }}
+
+  className="
+  mt-6
+  bg-red-600
+  hover:bg-red-700
+  p-4
+  rounded-2xl
+  transition-all
+  font-semibold
+  shadow-lg
+  w-full
+  "
+
+>
+
+  🚪 Cerrar Sesión
+
+</button>
       {/* FOOTER */}
 
       <div className="mt-12 border-t border-slate-700 pt-6">
