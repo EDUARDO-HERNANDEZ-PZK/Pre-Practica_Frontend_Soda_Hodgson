@@ -1,4 +1,5 @@
 export default interface CashSession {
+  id: string;
   user_id: string;
   open_time: Date;
   close_time: Date;
@@ -8,3 +9,5 @@ export default interface CashSession {
   cash_difference: number;
   status: string;
 }
+
+export type CreateCashSessionDto = Omit<CashSession, "id">;

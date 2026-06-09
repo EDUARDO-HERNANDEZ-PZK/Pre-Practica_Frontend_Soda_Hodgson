@@ -5,3 +5,5 @@ export default interface DailyExpense {
   amount: number;
   expense_time: Date;
 }
+
+export type CreateDailyExpenseDto = Omit<DailyExpense, "id">;
