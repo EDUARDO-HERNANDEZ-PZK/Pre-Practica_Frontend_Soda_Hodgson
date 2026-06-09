@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/layout/products/ProductCard";
 import ProductModal from "../components/layout/products/ProductModal";
-import { Product } from "../models/Product";
-import { productsService } from "../api/products";
+import { CreateProductDto, Product, UpdateProductDto } from "../models/Product";
+import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct } from "../hooks/useProducts";
 
 export default function Products() {
-
-  const [products, setProducts] = useState<Product[]>([]);
+  const { data: products = [], isLoading } = useProducts();
+  const deleteProduct = useDeleteProduct();
+  const createProduct = useCreateProduct();
+  const updateProduct = useUpdateProduct();
   const [view, setView] = useState<"grid" | "table">("grid");
 
   const [showModal, setShowModal] = useState(false);
@@ -14,52 +16,36 @@ export default function Products() {
 
   const [search, setSearch] = useState("");
 
-  const loadProducts = async () => {
-    try {
-      const data = await productsService.getAll();
-
-      setProducts(data);
-    } catch (error) {
-      console.error("Error loading products:", error);
-    }
-  };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const saveProduct = (product: any) => {
+  const saveProduct = async (product: CreateProductDto) => {
 
-    if (editingProduct) {
-
-      setProducts(
-        products.map((item) =>
-          item.id === product.id ? product : item
-        )
-      );
-
-    } else {
-
-      setProducts([
-        ...products,
-        {
-          ...product,
-          id: Date.now(),
-        },
-      ]);
-
-    }
+    await createProduct.mutateAsync(product);
 
     setShowModal(false);
     setEditingProduct(null);
 
   };
 
-  const deleteProduct = (id: string) => {
+  const onEditProduct = async (id: string, product: UpdateProductDto) => {
+
+    await updateProduct.mutateAsync({
+      id,
+      data: product,
+    });
+
+    setShowModal(false);
+    setEditingProduct(null);
+  }
+
+  const onDeleteProduct = async (id: string) => {
 
     if (!window.confirm("¿Eliminar este producto?")) return;
 
-    setProducts(products.filter((item) => item.id !== id));
+    await deleteProduct.mutateAsync(id);
 
   };
 
@@ -69,10 +55,6 @@ export default function Products() {
     setShowModal(true);
 
   };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
 
   return (
 
@@ -171,7 +153,7 @@ export default function Products() {
 
                     onEdit={() => editProduct(product)}
 
-                    onDelete={() => deleteProduct(product.id)}
+                    onDelete={() => onDeleteProduct(product.id)}
 
                   />
 
@@ -248,7 +230,7 @@ export default function Products() {
                           </button>
 
                           <button
-                            onClick={() => deleteProduct(product.id)}
+                            onClick={() => onDeleteProduct(product.id)}
                             className="bg-red-500 text-white px-4 py-2 rounded-xl"
                           >
                             Eliminar
@@ -281,6 +263,7 @@ export default function Products() {
           setEditingProduct(null);
         }}
         onSave={saveProduct}
+        onEditProduct={onEditProduct}
       />
 
     </div>
