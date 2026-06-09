@@ -1,11 +1,6 @@
-import { name } from './../../node_modules/espree/dist/espree.d';
-export interface User{
+export default interface User{
     id: string;
     name: string;
-    role: UserRole;
-}
-
-export enum UserRole {
-    ADMINISTRADOR = "Administrador",
-    CAJERO = "Cajero",
+    password: string;
+    roleId: string; ///este se va relacionar con el modelo de Role
 }
