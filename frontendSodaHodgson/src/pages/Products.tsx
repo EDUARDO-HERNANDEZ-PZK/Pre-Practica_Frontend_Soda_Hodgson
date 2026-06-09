@@ -206,7 +206,6 @@ export default function Products() {
                           />
 
                         </td>
-
                         <td className="p-4 font-semibold">
                           {product.name}
                         </td>
