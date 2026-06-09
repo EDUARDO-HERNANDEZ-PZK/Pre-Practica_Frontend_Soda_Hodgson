@@ -6,3 +6,5 @@ export default interface SalesDetail {
   unit_price: number;
   subtotal: number;
 }
+
+export type CreateSalesDetailDto = Omit<SalesDetail, "id">;

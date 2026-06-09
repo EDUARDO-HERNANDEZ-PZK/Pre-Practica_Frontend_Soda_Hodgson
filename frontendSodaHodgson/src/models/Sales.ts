@@ -7,3 +7,6 @@ export default interface Sales {
   sale_time: Date;
   status: string;
 }
+
+
+export type CreateSalesDto = Omit <Sales, "id">;

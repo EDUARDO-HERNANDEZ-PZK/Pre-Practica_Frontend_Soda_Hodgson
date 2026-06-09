@@ -7,12 +7,17 @@ import { Product } from "../models/Product";
 import { orders } from "../data/orders";
 import { productsService } from "../api/products";
 import { useTables } from "../hooks/useTables";
+import { useCreateSalesDetail } from "../hooks/useSalesDetail";
+import { useCreateSale } from "../hooks/useSales";
+import { Table } from "../models/Table";
 
 const POS: React.FC = () => {
+  const createSale = useCreateSale();
+  const createSalesDetail = useCreateSalesDetail();
   const { data: tables = [] } = useTables();
   const [cart, setCart] = useState<InvoiceDetail[]>([]);
 
-  const [selectedTable, setSelectedTable] = useState<number | null>(null);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
   const [saleType, setSaleType] = useState<"RAPIDA" | "MESA">("RAPIDA");
 
@@ -124,29 +129,51 @@ const POS: React.FC = () => {
   };
 
   // FINALIZAR VENTA
-  const finishSale = () => {
+  const finishSale = async () => {
+    try {
 
-    orders.push({
-      tableId: selectedTable,
-      items: cart,
-      total,
-      date: new Date(),
-    });
+      // Crear encabezado de venta
+      const sale = await createSale.mutateAsync({
+        session_id: "SESSION_ID",
+        table_id: selectedTable?.id ?? "venta rapida",
+        user_creator_id: "USER_ID",
+        ruc_number: "no-tener",
+        sale_time: new Date(),
+        status: "COMPLETED",
+      });
 
-    setTicketData({
-      cart,
-      total,
-      paymentMethod,
-      cash,
-      change,
-    });
+      // Crear detalles
+      await Promise.all(
+        cart.map((item) =>
+          createSalesDetail.mutateAsync({
+            sale_id: sale.id,
+            product_id: item.product.id,
+            quantity: item.quantity,
+            unit_price: item.product.price_sell,
+            subtotal: item.subtotal,
+          })
+        )
+      );
 
-    setShowTicket(true);
+      setTicketData({
+        cart,
+        total,
+        paymentMethod,
+        cash,
+        change,
+      });
 
-    setCart([]);
-    setSelectedTable(null);
-    setCash(0);
-    setShowModal(false);
+      setShowTicket(true);
+
+      setCart([]);
+      setSelectedTable(null);
+      setCash(0);
+      setShowModal(false);
+
+    } catch (error) {
+      console.error("Error creando venta:", error);
+      alert("No se pudo registrar la venta");
+    }
   };
 
   useEffect(() => {
@@ -213,10 +240,14 @@ const POS: React.FC = () => {
             </label>
 
             <select
-              value={selectedTable || ""}
-              onChange={(e) =>
-                setSelectedTable(Number(e.target.value))
-              }
+              value={selectedTable?.table_number ?? ""}
+              onChange={(e) => {
+                const table = tables.find(
+                  (t) => t.table_number === Number(e.target.value)
+                );
+
+                setSelectedTable(table || null);
+              }}
               className="w-full mt-3 p-4 border rounded-2xl"
             >
               <option value="">
@@ -225,13 +256,12 @@ const POS: React.FC = () => {
 
               {tables.map((table) => (
                 <option
-                  key={table.table_number}
+                  key={table.id}
                   value={table.table_number}
                 >
                   Mesa {table.table_number}
                 </option>
               ))}
-
             </select>
 
           </div>
@@ -310,7 +340,7 @@ overflow-hidden
 
               {saleType === "RAPIDA"
                 ? "🛍 Venta para llevar"
-                : `🍽 Consumo en Mesa ${selectedTable ?? ""}`}
+                : `🍽 Consumo en Mesa ${selectedTable?.table_number ?? ""}`}
 
             </p>
 
@@ -319,7 +349,7 @@ overflow-hidden
           {saleType === "MESA" && selectedTable && (
 
             <span className="bg-blue-100 text-blue-700 px-5 py-2 rounded-full font-semibold">
-              Mesa {selectedTable}
+              Mesa {selectedTable.table_number}
             </span>
 
           )}
