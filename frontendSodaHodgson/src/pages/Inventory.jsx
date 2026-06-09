@@ -1,17 +1,21 @@
 import Header from "../components/layout/Header";
-import { productsData } from "../data/products";
+import { useProducts} from "../hooks/useProducts";
+import { useCategories} from "../hooks/useCategories";
+import { getCategoryName } from "../utils/getCategoryName";
 
 export default function Inventory() {
+  const { data: productsData = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
 
   const totalStock = productsData.reduce(
-    (total, product) => total + product.stock,
+    (total, product) => total + product.stock_current,
     0
   );
 
   const totalProducts = productsData.length;
 
   const lowStock = productsData.filter(
-    (product) => product.stock <= 20
+    (product) => product.stock_current <= 20
   ).length;
 
   return (
@@ -112,7 +116,7 @@ export default function Inventory() {
                 <td className="p-4">
 
                   <img
-                    src={product.image}
+                    src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
                     alt={product.name}
                     className="w-16 h-16 rounded-xl object-cover"
                   />
@@ -127,19 +131,19 @@ export default function Inventory() {
 
                 <td className="p-4">
 
-                  {product.category}
+                  {getCategoryName(product.category_id, categories)}
 
                 </td>
 
                 <td className="p-4 font-bold text-cyan-700">
 
-                  C$ {product.price}
+                  C$ {product.price_sell}
 
                 </td>
 
                 <td className="p-4 font-semibold">
 
-                  {product.stock}
+                  {product.stock_current}
 
                 </td>
 
@@ -147,12 +151,12 @@ export default function Inventory() {
 
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      product.stock <= 20
+                      product.stock_current <= 20
                         ? "bg-red-100 text-red-700"
                         : "bg-green-100 text-green-700"
                     }`}
                   >
-                    {product.stock <= 20
+                    {product.stock_current <= 20
                       ? "Stock Bajo"
                       : "Disponible"}
                   </span>
