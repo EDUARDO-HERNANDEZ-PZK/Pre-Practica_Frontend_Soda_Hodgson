@@ -4,11 +4,12 @@ import { useReactToPrint } from "react-to-print";
 import Ticket from "../components/layout/Ticket";
 import { InvoiceDetail } from "../models/Cart";
 import { Product } from "../models/Product";
-import { tables } from "../data/tables";
 import { orders } from "../data/orders";
 import { productsService } from "../api/products";
+import { useTables } from "../hooks/useTables";
 
 const POS: React.FC = () => {
+  const { data: tables = [] } = useTables();
   const [cart, setCart] = useState<InvoiceDetail[]>([]);
 
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
@@ -224,8 +225,8 @@ const POS: React.FC = () => {
 
               {tables.map((table) => (
                 <option
-                  key={table.id}
-                  value={table.id}
+                  key={table.table_number}
+                  value={table.table_number}
                 >
                   Mesa {table.table_number}
                 </option>
