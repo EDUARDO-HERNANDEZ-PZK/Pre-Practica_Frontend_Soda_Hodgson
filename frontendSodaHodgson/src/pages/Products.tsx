@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/layout/products/ProductCard";
 import ProductModal from "../components/layout/products/ProductModal";
-import { CreateProductDto, Product, UpdateProductDto } from "../models/Product";
+import { CreateProductDto, UpdateProductDto } from "../models/Product";
 import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct } from "../hooks/useProducts";
+import { useCategories } from "../hooks/useCategories";
+import { getCategoryName } from "../utils/getCategoryName";
 
 export default function Products() {
   const { data: products = [], isLoading } = useProducts();
+  const { data: categories = [] } = useCategories();
   const deleteProduct = useDeleteProduct();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
@@ -198,7 +201,7 @@ export default function Products() {
                         <td className="p-4">
 
                           <img
-                            src={product.imageUrl}
+                            src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
                             className="w-16 h-16 rounded-xl object-cover"
                           />
 
@@ -209,7 +212,7 @@ export default function Products() {
                         </td>
 
                         <td className="p-4">
-                          {product.category_id}
+                          {getCategoryName(product.category_id, categories)}
                         </td>
 
                         <td className="p-4 text-cyan-700 font-bold">

@@ -1,4 +1,6 @@
+import { useCategories } from "../../../hooks/useCategories";
 import { Product } from "../../../models/Product";
+import { getCategoryName } from "../../../utils/getCategoryName";
 
 interface Props {
   product: Product;
@@ -11,6 +13,9 @@ export default function ProductCard({
   onEdit,
   onDelete,
 }: Props) {
+
+  const { data: categories = [] } = useCategories();
+
   return (
     <div
       className="
@@ -53,7 +58,10 @@ export default function ProductCard({
           shadow
           "
         >
-          {product.category_id}
+          {getCategoryName(
+            product.category_id,
+            categories
+          )}
         </span>
 
       </div>
@@ -87,11 +95,10 @@ export default function ProductCard({
             </p>
 
             <h3
-              className={`text-2xl font-bold ${
-                product.stock_current <= 10
-                  ? "text-red-500"
-                  : "text-emerald-600"
-              }`}
+              className={`text-2xl font-bold ${product.stock_current <= 10
+                ? "text-red-500"
+                : "text-emerald-600"
+                }`}
             >
               {product.stock_current}
             </h3>
@@ -124,9 +131,9 @@ export default function ProductCard({
 
         <div className="grid grid-cols-2 gap-3 mt-8">
 
-        <button
-  onClick={onEdit}
-  className="
+          <button
+            onClick={onEdit}
+            className="
     flex-1
     bg-cyan-600
     hover:bg-cyan-700
@@ -135,13 +142,13 @@ export default function ProductCard({
     rounded-xl
     font-semibold
   "
->
-  Editar
-</button>
+          >
+            Editar
+          </button>
 
-<button
-  onClick={onDelete}
-  className="
+          <button
+            onClick={onDelete}
+            className="
     flex-1
     bg-red-500
     hover:bg-red-600
@@ -150,9 +157,9 @@ export default function ProductCard({
     rounded-xl
     font-semibold
   "
->
-  Eliminar
-</button>
+          >
+            Eliminar
+          </button>
 
         </div>
 

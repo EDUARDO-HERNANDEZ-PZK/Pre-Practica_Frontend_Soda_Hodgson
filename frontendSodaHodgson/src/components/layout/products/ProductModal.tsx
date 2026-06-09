@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { CreateProductDto, Product, UpdateProductDto } from "../../../models/Product";
-import Categories from "../../../models/Categories";
+import { useCategories } from "../../../hooks/useCategories";
 
-const mockupCategory: Categories[] = [
-  {
-    id: "b1cc31976cc6c93d",
-    name: "frutas"
-  }
-];
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -24,6 +18,8 @@ export default function ProductModal({
   product,
 }: Props) {
 
+  const { data: categories = [] } = useCategories();
+  
   const initialForm: CreateProductDto = {
     name: "",
     description: "",
@@ -125,7 +121,7 @@ export default function ProductModal({
           >
             <option value="">Seleccione una categoría</option>
 
-            {mockupCategory.map((category) => (
+            {categories.map((category) => (
               <option
                 key={category.id}
                 value={category.id}
