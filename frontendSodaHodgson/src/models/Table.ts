@@ -1,6 +1,8 @@
 export interface Table {
   id: string;
-  number: number;
+  table_number: number;
   capacity: number; ///este campo en el backend no existe
-  status: "Libre" | "Ocupada" | "Reservada";
+  status: "Disponible" | "Ocupada" | "Reservada";
 }
+
+export type CreateTableDto = Omit<Table, "id">;

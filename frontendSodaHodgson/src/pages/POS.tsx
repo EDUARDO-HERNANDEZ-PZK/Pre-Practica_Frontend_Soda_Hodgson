@@ -227,7 +227,7 @@ const POS: React.FC = () => {
                   key={table.id}
                   value={table.id}
                 >
-                  Mesa {table.number}
+                  Mesa {table.table_number}
                 </option>
               ))}
 
@@ -263,7 +263,7 @@ overflow-hidden
 "
           >
             <img
-              src={product.imageUrl}
+              src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
               alt={product.name}
               className="w-full h-52 object-cover"
             />
