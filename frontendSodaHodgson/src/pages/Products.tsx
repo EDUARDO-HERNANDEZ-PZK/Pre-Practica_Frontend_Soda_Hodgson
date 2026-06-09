@@ -1,17 +1,28 @@
-import { useState } from "react";
-import { productsData } from "../data/products";
+import { useEffect, useState } from "react";
 import ProductCard from "../components/layout/products/ProductCard";
 import ProductModal from "../components/layout/products/ProductModal";
+import { Product } from "../models/Product";
+import { productsService } from "../api/products";
 
 export default function Products() {
 
-  const [products, setProducts] = useState(productsData);
+  const [products, setProducts] = useState<Product[]>([]);
   const [view, setView] = useState<"grid" | "table">("grid");
 
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
 
   const [search, setSearch] = useState("");
+
+  const loadProducts = async () => {
+    try {
+      const data = await productsService.getAll();
+
+      setProducts(data);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    }
+  };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase())
@@ -44,7 +55,7 @@ export default function Products() {
 
   };
 
-  const deleteProduct = (id: number) => {
+  const deleteProduct = (id: string) => {
 
     if (!window.confirm("¿Eliminar este producto?")) return;
 
@@ -58,6 +69,10 @@ export default function Products() {
     setShowModal(true);
 
   };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
   return (
 
@@ -83,22 +98,20 @@ export default function Products() {
 
           <button
             onClick={() => setView("grid")}
-            className={`px-5 py-3 rounded-2xl font-semibold transition ${
-              view === "grid"
-                ? "bg-cyan-600 text-white"
-                : "bg-slate-200 text-slate-700"
-            }`}
+            className={`px-5 py-3 rounded-2xl font-semibold transition ${view === "grid"
+              ? "bg-cyan-600 text-white"
+              : "bg-slate-200 text-slate-700"
+              }`}
           >
             Tarjetas
           </button>
 
           <button
             onClick={() => setView("table")}
-            className={`px-5 py-3 rounded-2xl font-semibold transition ${
-              view === "table"
-                ? "bg-cyan-600 text-white"
-                : "bg-slate-200 text-slate-700"
-            }`}
+            className={`px-5 py-3 rounded-2xl font-semibold transition ${view === "table"
+              ? "bg-cyan-600 text-white"
+              : "bg-slate-200 text-slate-700"
+              }`}
           >
             Tabla
           </button>
@@ -203,7 +216,7 @@ export default function Products() {
                         <td className="p-4">
 
                           <img
-                            src={product.image}
+                            src={product.imageUrl}
                             className="w-16 h-16 rounded-xl object-cover"
                           />
 
@@ -214,15 +227,15 @@ export default function Products() {
                         </td>
 
                         <td className="p-4">
-                          {product.category}
+                          {product.category_id}
                         </td>
 
                         <td className="p-4 text-cyan-700 font-bold">
-                          C$ {product.price}
+                          C$ {product.price_sell}
                         </td>
 
                         <td className="p-4">
-                          {product.stock}
+                          {product.stock_current}
                         </td>
 
                         <td className="p-4 flex gap-2">
@@ -260,15 +273,15 @@ export default function Products() {
         }
 
       </div>
-<ProductModal
-  open={showModal}
-  product={editingProduct}
-  onClose={() => {
-    setShowModal(false);
-    setEditingProduct(null);
-  }}
-  onSave={saveProduct}
-/>
+      <ProductModal
+        open={showModal}
+        product={editingProduct}
+        onClose={() => {
+          setShowModal(false);
+          setEditingProduct(null);
+        }}
+        onSave={saveProduct}
+      />
 
     </div>
 

@@ -1,5 +1,7 @@
+import { Product } from "../../../models/Product";
+
 interface Props {
-  product: any;
+  product: Product;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -31,7 +33,7 @@ export default function ProductCard({
       <div className="relative">
 
         <img
-          src={product.image}
+          src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
           alt={product.name}
           className="w-full h-52 object-cover"
         />
@@ -51,7 +53,7 @@ export default function ProductCard({
           shadow
           "
         >
-          {product.category}
+          {product.category_id}
         </span>
 
       </div>
@@ -73,7 +75,7 @@ export default function ProductCard({
             </p>
 
             <h3 className="text-3xl font-bold text-cyan-600">
-              C$ {product.price}
+              C$ {product.price_sell}
             </h3>
 
           </div>
@@ -86,12 +88,12 @@ export default function ProductCard({
 
             <h3
               className={`text-2xl font-bold ${
-                product.stock <= 10
+                product.stock_current <= 10
                   ? "text-red-500"
                   : "text-emerald-600"
               }`}
             >
-              {product.stock}
+              {product.stock_current}
             </h3>
 
           </div>
