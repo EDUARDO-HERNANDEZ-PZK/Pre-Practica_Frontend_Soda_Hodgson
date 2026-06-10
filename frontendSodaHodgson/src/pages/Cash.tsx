@@ -1,92 +1,110 @@
 import { useState } from "react";
-
 import Header from "../components/layout/Header";
 import CashModal from "../components/layout/cash/CashModal";
 
-import { cashData } from "../data/cash";
+
+import { useCashSessions, useCreateCashSession, useDeleteCashSession, useUpdateCashSession } from "../hooks/useCashSession";
+import { useCreateDailyExpense, useDailyExpenses, useDeleteDailyExpense, useUpdateDailyExpense } from "../hooks/useDailyExpense";
+import DailyExpense, { CreateDailyExpenseDto } from "../models/DailyExpense";
+import ExpenseModal from "../components/layout/cash/CashModal";
+import CashSession from "../models/CashSession";
+import CashSessionModal from "./CashSessionModal";
 
 export default function Cash() {
 
-  const [cash, setCash] = useState(cashData);
+  const { data: cashSessions = [] } = useCashSessions();
+  const { data: dailyExpenses = [] } = useDailyExpenses();
 
-  const [showModal, setShowModal] = useState(false);
+  const createCashSession = useCreateCashSession();
+  const updateCashSession = useUpdateCashSession();
+  const deleteCashSession = useDeleteCashSession();
 
-  const [editingCash, setEditingCash] = useState<any>(null);
+  const createDailyExpense = useCreateDailyExpense();
+  const updateDailyExpense = useUpdateDailyExpense();
+  const deleteDailyExpense = useDeleteDailyExpense();
 
-  const ingresos = cash
-    .filter((m) => m.type === "Ingreso")
-    .reduce((a, b) => a + b.amount, 0);
+  const [showExpenseModal, setShowExpenseModal] =
+    useState(false);
 
-  const egresos = cash
-    .filter((m) => m.type === "Egreso")
-    .reduce((a, b) => a + b.amount, 0);
+  const [showSessionModal, setShowSessionModal] =
+    useState(false);
+
+  const [editingExpense, setEditingExpense] =
+    useState<DailyExpense | null>(null);
+
+  const [editingSession, setEditingSession] =
+    useState<CashSession | null>(null);
+
+  const ingresos = cashSessions.reduce(
+    (acc, item) => acc + item.expected_closing_balance,
+    0
+  );
+
+  const egresos = dailyExpenses.reduce(
+    (acc, item) => acc + item.amount,
+    0
+  );
 
   const saldo = ingresos - egresos;
 
-  const saveCash = (movement: any) => {
+  const saveExpense = async ({
+    description,
+    amount,
+  }: {
+    description: string;
+    amount: number;
+  }) => {
+    const dto: CreateDailyExpenseDto = {
+      session_id: cashSessions[0]?.id ?? "",
+      description,
+      amount,
+      expense_time: new Date(),
+    };
 
-    if (editingCash) {
-
-      setCash(
-
-        cash.map((item) =>
-
-          item.id === movement.id
-
-            ? movement
-
-            : item
-
-        )
-
-      );
-
+    if (editingExpense) {
+      await updateDailyExpense.mutateAsync({
+        id: editingExpense.id,
+        data: dto,
+      });
     } else {
-
-      setCash([
-
-        ...cash,
-
-        {
-
-          ...movement,
-
-          id: Date.now(),
-
-        },
-
-      ]);
-
+      await createDailyExpense.mutateAsync(dto);
     }
 
-    setShowModal(false);
+    setShowExpenseModal(false);
+    setEditingExpense(null);
+  };
 
-    setEditingCash(null);
+
+  const saveSession = async ({
+    opening_balance,
+  }: {
+    opening_balance: number;
+  }) => {
+    await createCashSession.mutateAsync({
+      user_id: "USER_ID",
+      open_time: new Date(),
+      close_time: new Date(),
+      opening_balance,
+      closing_balance_real: 0,
+      expected_closing_balance: 0,
+      cash_difference: 0,
+      status: "OPEN",
+    });
+
+    setShowSessionModal(false);
+  };
+
+  const deleteExpense = async (id: string) => {
+
+    if (!window.confirm("Eliminar gasto?")) return;
+
+    await deleteDailyExpense.mutateAsync(id);
 
   };
 
-  const deleteCash = (id: number) => {
-
-    if (!window.confirm("Eliminar movimiento?")) return;
-
-    setCash(
-
-      cash.filter(
-
-        (item) => item.id !== id
-
-      )
-
-    );
-
-  };
-
-  const editCash = (movement: any) => {
-
-    setEditingCash(movement);
-
-    setShowModal(true);
-
+  const editExpense = (expense: DailyExpense) => {
+    setEditingExpense(expense);
+    setShowExpenseModal(true);
   };
 
   return (
@@ -97,23 +115,29 @@ export default function Cash() {
 
         <Header title="Caja" />
 
-        <button
+        <div className="flex gap-3">
 
-          onClick={() => {
+          <button
+            onClick={() => {
+              setEditingSession(null);
+              setShowSessionModal(true);
+            }}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-semibold"
+          >
+            Abrir Caja
+          </button>
 
-            setEditingCash(null);
+          <button
+            onClick={() => {
+              setEditingExpense(null);
+              setShowExpenseModal(true);
+            }}
+            className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-2xl font-semibold"
+          >
+            Nuevo Gasto
+          </button>
 
-            setShowModal(true);
-
-          }}
-
-          className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-2xl font-semibold"
-
-        >
-
-          Nuevo Movimiento
-
-        </button>
+        </div>
 
       </div>
 
@@ -168,6 +192,80 @@ export default function Cash() {
         </div>
 
       </div>
+      <div className="bg-white rounded-3xl shadow mt-8 overflow-hidden">
+
+        <div className="p-6 border-b">
+
+          <h2 className="text-2xl font-bold">
+            Sesiones de Caja
+          </h2>
+
+        </div>
+
+        <table className="w-full">
+
+          <thead className="bg-slate-100">
+
+            <tr>
+              <th className="p-4 text-left">Apertura</th>
+              <th className="p-4 text-left">Cierre</th>
+              <th className="p-4 text-left">Inicial</th>
+              <th className="p-4 text-left">Esperado</th>
+              <th className="p-4 text-left">Real</th>
+              <th className="p-4 text-left">Diferencia</th>
+              <th className="p-4 text-left">Estado</th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {cashSessions.map((session) => (
+
+              <tr
+                key={session.id}
+                className="border-t"
+              >
+
+                <td className="p-4">
+                  {new Date(session.open_time).toLocaleString()}
+                </td>
+
+                <td className="p-4">
+                  {session.close_time
+                    ? new Date(session.close_time).toLocaleString()
+                    : "-"}
+                </td>
+
+                <td className="p-4">
+                  C$ {session.opening_balance}
+                </td>
+
+                <td className="p-4">
+                  C$ {session.expected_closing_balance}
+                </td>
+
+                <td className="p-4">
+                  C$ {session.closing_balance_real}
+                </td>
+
+                <td className="p-4">
+                  C$ {session.cash_difference}
+                </td>
+
+                <td className="p-4">
+                  {session.status}
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
 
       <div className="bg-white rounded-3xl shadow mt-8 overflow-hidden">
 
@@ -191,50 +289,48 @@ export default function Cash() {
 
           <tbody>
 
-            {cash.map((item) => (
+            {dailyExpenses.map((item) => (
 
               <tr key={item.id} className="border-t">
 
-                <td className="p-4">{item.date}</td>
+                <td className="p-4">
+                  {new Date(item.expense_time).toLocaleDateString()}
+                </td>
 
-                <td className="p-4">{item.type}</td>
+                <td className="p-4">
+                  Egreso
+                </td>
 
-                <td className="p-4">{item.method}</td>
+                <td className="p-4">
+                  -
+                </td>
 
-                <td className="p-4">{item.concept}</td>
+                <td className="p-4">
+                  {item.description}
+                </td>
 
-                <td className="p-4">{item.cashier}</td>
+                <td className="p-4">
+                  -
+                </td>
 
-                <td className="p-4 font-bold">
-
+                <td className="p-4 font-bold text-red-500">
                   C$ {item.amount}
-
                 </td>
 
                 <td className="p-4 flex gap-2">
 
                   <button
-
-                    onClick={() => editCash(item)}
-
+                    onClick={() => editExpense(item)}
                     className="bg-cyan-600 text-white px-4 py-2 rounded-xl"
-
                   >
-
                     Editar
-
                   </button>
 
                   <button
-
-                    onClick={() => deleteCash(item.id)}
-
+                    onClick={() => deleteExpense(item.id)}
                     className="bg-red-500 text-white px-4 py-2 rounded-xl"
-
                   >
-
                     Eliminar
-
                   </button>
 
                 </td>
@@ -249,22 +345,24 @@ export default function Cash() {
 
       </div>
 
-      <CashModal
-
-        open={showModal}
-
-        cash={editingCash}
-
+      <ExpenseModal
+        open={showExpenseModal}
+        expense={editingExpense}
         onClose={() => {
-
-          setShowModal(false);
-
-          setEditingCash(null);
-
+          setShowExpenseModal(false);
+          setEditingExpense(null);
         }}
+        onSave={saveExpense}
+      />
 
-        onSave={saveCash}
-
+      <CashSessionModal
+        open={showSessionModal}
+        session={editingSession}
+        onClose={() => {
+          setShowSessionModal(false);
+          setEditingSession(null);
+        }}
+        onSave={saveSession}
       />
 
     </div>
