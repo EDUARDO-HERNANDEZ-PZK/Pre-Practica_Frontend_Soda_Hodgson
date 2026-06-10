@@ -1,7 +1,5 @@
 import { useState } from "react";
 import Header from "../components/layout/Header";
-import CashModal from "../components/layout/cash/CashModal";
-
 
 import { useCashSessions, useCreateCashSession, useDeleteCashSession, useUpdateCashSession } from "../hooks/useCashSession";
 import { useCreateDailyExpense, useDailyExpenses, useDeleteDailyExpense, useUpdateDailyExpense } from "../hooks/useDailyExpense";
@@ -36,7 +34,7 @@ export default function Cash() {
     useState<CashSession | null>(null);
 
   const ingresos = cashSessions.reduce(
-    (acc, item) => acc + item.expected_closing_balance,
+    (acc, item) => acc + item.opening_balance,
     0
   );
 
@@ -80,18 +78,42 @@ export default function Cash() {
   }: {
     opening_balance: number;
   }) => {
-    await createCashSession.mutateAsync({
-      user_id: "USER_ID",
-      open_time: new Date(),
-      close_time: new Date(),
-      opening_balance,
-      closing_balance_real: 0,
-      expected_closing_balance: 0,
-      cash_difference: 0,
-      status: "OPEN",
-    });
+    try {
 
-    setShowSessionModal(false);
+      const dto = {
+        user_id: editingSession?.user_id ?? "USER_ID",
+        open_time: editingSession?.open_time ?? new Date(),
+        close_time: editingSession?.close_time ?? new Date(),
+        opening_balance,
+        closing_balance_real:
+          editingSession?.closing_balance_real ?? 0,
+        expected_closing_balance:
+          editingSession?.expected_closing_balance ?? 0,
+        cash_difference:
+          editingSession?.cash_difference ?? 0,
+        status:
+          editingSession?.status ?? "OPEN",
+      };
+
+      if (editingSession) {
+
+        await updateCashSession.mutateAsync({
+          id: editingSession.id,
+          data: dto,
+        });
+
+      } else {
+
+        await createCashSession.mutateAsync(dto);
+
+      }
+
+      setShowSessionModal(false);
+      setEditingSession(null);
+
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const deleteExpense = async (id: string) => {
@@ -105,6 +127,29 @@ export default function Cash() {
   const editExpense = (expense: DailyExpense) => {
     setEditingExpense(expense);
     setShowExpenseModal(true);
+  };
+
+  const editSession = (
+    session: CashSession
+  ) => {
+
+    setEditingSession(session);
+    setShowSessionModal(true);
+
+  };
+
+  const removeSession = async (
+    id: string
+  ) => {
+
+    if (
+      !window.confirm(
+        "¿Eliminar sesión de caja?"
+      )
+    ) return;
+
+    await deleteCashSession.mutateAsync(id);
+
   };
 
   return (
@@ -214,6 +259,9 @@ export default function Cash() {
               <th className="p-4 text-left">Real</th>
               <th className="p-4 text-left">Diferencia</th>
               <th className="p-4 text-left">Estado</th>
+              <th className="p-4 text-left">
+                Acciones
+              </th>
             </tr>
 
           </thead>
@@ -255,6 +303,28 @@ export default function Cash() {
 
                 <td className="p-4">
                   {session.status}
+                </td>
+
+                <td className="p-4 flex gap-2">
+
+                  <button
+                    onClick={() =>
+                      editSession(session)
+                    }
+                    className="bg-cyan-600 text-white px-4 py-2 rounded-xl"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      removeSession(session.id)
+                    }
+                    className="bg-red-500 text-white px-4 py-2 rounded-xl"
+                  >
+                    Eliminar
+                  </button>
+
                 </td>
 
               </tr>
