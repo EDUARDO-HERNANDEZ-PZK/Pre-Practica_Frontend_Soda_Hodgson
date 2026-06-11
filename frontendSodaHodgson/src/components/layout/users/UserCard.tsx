@@ -1,16 +1,12 @@
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  avatar: string;
-}
+import { useRoles } from "../../../hooks/useRole";
+import User, { UpdateUserDto } from "../../../models/User";
+import { getRolName } from "../../../utils/getRoleName";
 
 interface Props {
   user: User;
-  onEdit: () => void;
-  onDelete: () => void;
+  onEdit: (id: string,
+    data: UpdateUserDto) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function UserCard({
@@ -18,6 +14,8 @@ export default function UserCard({
   onEdit,
   onDelete,
 }: Props) {
+  const { data: roles = [] } = useRoles();
+  
   return (
     <div
       className="
@@ -43,16 +41,16 @@ export default function UserCard({
         font-bold
         "
       >
-        {user.avatar}
+        <img src="https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1" alt="user not found" />
       </div>
 
       <h2 className="text-2xl font-bold mt-4">
-        {user.name}
+        {user.username}
       </h2>
-
+      {/* 
       <p className="text-slate-500">
         {user.email}
-      </p>
+      </p> */}
 
       <span
         className="
@@ -66,13 +64,13 @@ export default function UserCard({
         text-sm
         "
       >
-        {user.role}
+        {getRolName(user.role_id, roles)}
       </span>
 
       <div className="flex gap-3 mt-6">
 
         <button
-          onClick={onEdit}
+          onClick={()=>onEdit(user.id, user)}
           className="
           flex-1
           bg-cyan-600
@@ -85,7 +83,7 @@ export default function UserCard({
         </button>
 
         <button
-          onClick={onDelete}
+          onClick={()=>onDelete(user.id)}
           className="
           flex-1
           bg-red-500

@@ -3,52 +3,69 @@ import { useState } from "react";
 import Header from "../components/layout/Header";
 import UserCard from "../components/layout/users/UserCard";
 import UserModal from "../components/layout/users/UserModal";
-
-import { usersData } from "../data/users";
+import { useCreateUser, useUsers, useUpdateUser, useDeleteUser } from "../hooks/useUser";
+import { CreateUserDto, UpdateUserDto } from "../models/User";
+import CreateUserModal from "../components/layout/users/CreateUserModal";
+import EditUserModal from "../components/layout/users/EditUserModal";
 
 export default function Users() {
-  const [users, setUsers] = useState(usersData);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const { data: users = [], isLoading } = useUsers();
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
   const [search, setSearch] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
   const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase())
+    user.username.toLowerCase().includes(search.toLowerCase())
   );
 
-  const saveUser = (user) => {
-    if (editingUser) {
-      setUsers(
-        users.map((item) =>
-          item.id === user.id ? user : item
-        )
-      );
-    } else {
-      setUsers([
-        ...users,
-        {
-          ...user,
-          id: Date.now(),
-        },
-      ]);
-    }
+  const saveUser = async (
+    data: CreateUserDto
+  ) => {
 
-    setShowModal(false);
+    await createUser.mutateAsync(data);
+
+    setShowCreateModal(false);
+
+  };
+
+  const onEditUser = async (
+    id: string,
+    data: UpdateUserDto
+  ) => {
+
+    await updateUser.mutateAsync({
+      id,
+      data,
+    });
+
+    setShowEditModal(false);
     setEditingUser(null);
+
   };
 
-  const deleteUser = (id) => {
-    if (!window.confirm("¿Eliminar usuario?")) return;
+  const deleteUser = async (
+    id: string
+  ) => {
 
-    setUsers(
-      users.filter((item) => item.id !== id)
-    );
+    if (
+      !window.confirm(
+        "¿Eliminar usuario?"
+      )
+    ) return;
+
+    await deleteUserMutation.mutateAsync(id);
+
   };
 
-  const editUser = (user) => {
+  const editUser = (user: any) => {
     setEditingUser(user);
-    setShowModal(true);
+    setShowEditModal(true);
   };
 
   return (
@@ -60,8 +77,7 @@ export default function Users() {
 
         <button
           onClick={() => {
-            setEditingUser(null);
-            setShowModal(true);
+            setShowCreateModal(true);
           }}
           className="
             bg-cyan-600
@@ -123,7 +139,7 @@ export default function Users() {
           <h2 className="text-4xl font-bold mt-2">
             {
               users.filter(
-                (u) => u.role === "Administrador"
+                (u) => u.role_id === "575201e5b377c1d2"
               ).length
             }
           </h2>
@@ -137,7 +153,7 @@ export default function Users() {
           <h2 className="text-4xl font-bold mt-2">
             {
               users.filter(
-                (u) => u.role === "Cajero"
+                (u) => u.role_id === "11668d17834b3deb"
               ).length
             }
           </h2>
@@ -171,14 +187,22 @@ export default function Users() {
 
       {/* MODAL */}
 
-      <UserModal
-        open={showModal}
+      <CreateUserModal
+        open={showCreateModal}
+        onClose={() =>
+          setShowCreateModal(false)
+        }
+        onSave={saveUser}
+      />
+
+      <EditUserModal
+        open={showEditModal}
         user={editingUser}
         onClose={() => {
-          setShowModal(false);
+          setShowEditModal(false);
           setEditingUser(null);
         }}
-        onSave={saveUser}
+        onEdit={onEditUser}
       />
 
     </div>
