@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { usersData } from "../data/users";
+import { useUsers } from "../hooks/useUser";
 
 export default function Login() {
-
-  const [email, setEmail] = useState("");
+  const { data: users = [], isLoading } = useUsers();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -14,23 +14,18 @@ export default function Login() {
     return <Navigate to="/" replace />;
   }
 
-  const login = (e) => {
-
+  const login = async (e: any) => {
     e.preventDefault();
 
-    const user = usersData.find(
-
+    const user = users.find(
       (u) =>
-        u.email === email &&
-        u.password === password
-
+        u.username === username &&
+        u.password_hash === password
     );
 
     if (!user) {
-
-      setError("Correo o contraseña incorrectos");
+      setError("Usuario o contraseña incorrectos");
       return;
-
     }
 
     localStorage.setItem(
@@ -39,8 +34,15 @@ export default function Login() {
     );
 
     window.location.href = "/";
-
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Cargando...
+      </div>
+    );
+  }
 
   return (
 
@@ -62,11 +64,10 @@ export default function Login() {
         >
 
           <input
-            type="email"
-            placeholder="Correo"
-            value={email}
+            placeholder="Usuario"
+            value={username}
             onChange={(e) =>
-              setEmail(e.target.value)
+              setUsername(e.target.value)
             }
             className="w-full border rounded-2xl p-4"
           />
@@ -112,16 +113,6 @@ export default function Login() {
           </button>
 
         </form>
-
-        <div className="mt-8 text-sm text-slate-500">
-
-          <p>Administrador</p>
-
-          <p>admin@sodahodgson.com</p>
-
-          <p>admin123</p>
-
-        </div>
 
       </div>
 
