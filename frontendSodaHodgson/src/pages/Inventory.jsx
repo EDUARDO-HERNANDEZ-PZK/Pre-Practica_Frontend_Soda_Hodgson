@@ -10,7 +10,7 @@ import {
 
 import { useCategories } from "../hooks/useCategories";
 
-import { UpdateProductDto } from "../models/Product";
+//import { UpdateProductDto } from "../models/Product";//
 import { getCategoryName } from "../utils/getCategoryName";
 
 export default function Inventory() {
