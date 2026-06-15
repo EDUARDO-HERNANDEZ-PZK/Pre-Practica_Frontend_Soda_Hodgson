@@ -21,16 +21,25 @@ export default function ProductModal({
   const { data: categories = [] } = useCategories();
   
   const initialForm: CreateProductDto = {
-    name: "",
-    description: "",
-    category_id: "",
-    unit_id: "",
-    price_sell: 0,
-    stock_current: 0,
-    stock_min: 0,
-  };
+  name: "",
+  description: "",
+  category_id: "",
+  unit_id: "",
+  price_sell: 0,
+  stock_current: 0,
+  stock_expired: 0,
+  stock_damaged: 0,
+  stock_min: 0,
+};
 
-  const [form, setForm] = useState<CreateProductDto>(initialForm);
+ const [form, setForm] = useState<CreateProductDto>(initialForm);
+
+const stockAvailable = Math.max(
+  0,
+  form.stock_current -
+    form.stock_expired -
+    form.stock_damaged
+);
 
   const resetForm = () => {
     setForm(initialForm);
@@ -39,14 +48,16 @@ export default function ProductModal({
   useEffect(() => {
     if (product) {
       setForm({
-        name: product.name,
-        description: product.description,
-        category_id: product.category_id,
-        unit_id: product.unit_id,
-        price_sell: product.price_sell,
-        stock_current: product.stock_current,
-        stock_min: product.stock_min,
-      });
+    name: product.name,
+    description: product.description,
+    category_id: product.category_id,
+    unit_id: product.unit_id,
+    price_sell: product.price_sell,
+    stock_current: product.stock_current,
+    stock_expired: product.stock_expired,
+    stock_damaged: product.stock_damaged,
+    stock_min: product.stock_min,
+});
     } else {
       resetForm();
     }
@@ -141,27 +152,71 @@ export default function ProductModal({
             onChange={(e) =>
               setForm({
                 ...form,
-                price_sell: e.target.valueAsNumber,
+                price_sell: e.target.valueAsNumber || 0,
               })
             }
             className="w-full border rounded-xl p-3"
           />
           <label className="block mb-2 font-medium">
-            Stock actual
-          </label>
+  Stock total
+</label>
           <input
             type="number"
-            placeholder="Stock actual"
+            placeholder="Stock total"
             value={form.stock_current}
             onChange={(e) =>
               setForm({
                 ...form,
-                stock_current: e.target.valueAsNumber,
+                stock_current: e.target.valueAsNumber || 0,
               })
             }
             className="w-full border rounded-xl p-3"
           />
 
+<label className="block mb-2 font-medium">
+  Productos vencidos
+</label>
+
+<input
+  type="number"
+  placeholder="Productos vencidos"
+  value={form.stock_expired}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      stock_expired: e.target.valueAsNumber || 0,
+    })
+  }
+  className="w-full border rounded-xl p-3"
+/>
+
+<label className="block mb-2 font-medium">
+  Productos dañados
+</label>
+
+<input
+  type="number"
+  placeholder="Productos dañados"
+  value={form.stock_damaged}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      stock_damaged: e.target.valueAsNumber || 0,
+    })
+  }
+  className="w-full border rounded-xl p-3"
+/>
+<div className="bg-cyan-50 border border-cyan-200 rounded-2xl p-5">
+
+  <p className="text-slate-500 text-sm">
+    Stock disponible
+  </p>
+
+  <h2 className="text-4xl font-bold text-cyan-700 mt-2">
+    {stockAvailable}
+  </h2>
+
+</div>
           <label className="block mb-2 font-medium">
             Stock minimo
           </label>
@@ -172,7 +227,7 @@ export default function ProductModal({
             onChange={(e) =>
               setForm({
                 ...form,
-                stock_min: e.target.valueAsNumber,
+                stock_min: e.target.valueAsNumber || 0,
               })
             }
             className="w-full border rounded-xl p-3"
@@ -183,10 +238,27 @@ export default function ProductModal({
         <div className="flex justify-end gap-3 mt-8">
 
           <button
-            onClick={() => {
-              resetForm();
-              onClose();
-            }}
+           onClick={() => {
+
+  if (
+    form.stock_expired + form.stock_damaged >
+    form.stock_current
+  ) {
+    alert(
+      "Los productos vencidos y dañados no pueden ser mayores al stock total."
+    );
+    return;
+  }
+
+  if (product) {
+    onEditProduct(product.id, form);
+  } else {
+    onSave(form);
+  }
+
+  resetForm();
+  onClose();
+}}
             className="bg-slate-300 px-5 py-3 rounded-xl"
           >
             Cancelar

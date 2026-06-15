@@ -1,18 +1,53 @@
+import { useState } from "react";
+
 import Header from "../components/layout/Header";
-import { useProducts} from "../hooks/useProducts";
-import { useCategories} from "../hooks/useCategories";
+import InventoryModal from "../components/layout/inventory/InventoryModal";
+
+import {
+  useProducts,
+  useUpdateProduct,
+} from "../hooks/useProducts";
+
+import { useCategories } from "../hooks/useCategories";
+
+import { UpdateProductDto } from "../models/Product";
 import { getCategoryName } from "../utils/getCategoryName";
 
 export default function Inventory() {
   const { data: productsData = [] } = useProducts();
-  const { data: categories = [] } = useCategories();
+const { data: categories = [] } = useCategories();
+
+const updateProduct = useUpdateProduct();
+
+const [openModal, setOpenModal] = useState(false);
+
+const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const totalStock = productsData.reduce(
     (total, product) => total + product.stock_current,
     0
   );
 
-  const totalProducts = productsData.length;
+ const totalExpired = productsData.reduce(
+  (total, product) => total + product.stock_expired,
+  0
+);
+
+const totalDamaged = productsData.reduce(
+  (total, product) => total + product.stock_damaged,
+  0
+);
+
+const totalAvailable = productsData.reduce(
+  (total, product) =>
+    total +
+    (product.stock_current -
+      product.stock_expired -
+      product.stock_damaged),
+  0
+);
+
+const totalProducts = productsData.length;
 
   const lowStock = productsData.filter(
     (product) => product.stock_current <= 20
@@ -26,7 +61,7 @@ export default function Inventory() {
 
       {/* ESTADÍSTICAS */}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-8">
 
         <div className="bg-white rounded-3xl shadow-lg p-6">
 
@@ -45,6 +80,41 @@ export default function Inventory() {
           <p className="text-slate-500">
             Stock Total
           </p>
+          <div className="bg-white rounded-3xl shadow-lg p-6">
+
+  <p className="text-slate-500">
+    Disponible
+  </p>
+
+  <h2 className="text-4xl font-bold mt-2 text-green-600">
+    {totalAvailable}
+  </h2>
+
+</div>
+
+<div className="bg-white rounded-3xl shadow-lg p-6">
+
+  <p className="text-slate-500">
+    Vencidos
+  </p>
+
+  <h2 className="text-4xl font-bold mt-2 text-yellow-600">
+    {totalExpired}
+  </h2>
+
+</div>
+
+<div className="bg-white rounded-3xl shadow-lg p-6">
+
+  <p className="text-slate-500">
+    Dañados
+  </p>
+
+  <h2 className="text-4xl font-bold mt-2 text-red-600">
+    {totalDamaged}
+  </h2>
+
+</div>
 
           <h2 className="text-4xl font-bold mt-2 text-cyan-700">
             {totalStock}
