@@ -10,48 +10,56 @@ import {
 
 import { useCategories } from "../hooks/useCategories";
 
-//import { UpdateProductDto } from "../models/Product";//
 import { getCategoryName } from "../utils/getCategoryName";
 
 export default function Inventory() {
+
   const { data: productsData = [] } = useProducts();
-const { data: categories = [] } = useCategories();
+  const { data: categories = [] } = useCategories();
 
-const updateProduct = useUpdateProduct();
+  const updateProduct = useUpdateProduct();
 
-const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const totalProducts = productsData.length;
 
   const totalStock = productsData.reduce(
     (total, product) => total + product.stock_current,
     0
   );
 
- const totalExpired = productsData.reduce(
-  (total, product) => total + product.stock_expired,
-  0
-);
+  const totalExpired = productsData.reduce(
+    (total, product) => total + product.stock_expired,
+    0
+  );
 
-const totalDamaged = productsData.reduce(
-  (total, product) => total + product.stock_damaged,
-  0
-);
+  const totalDamaged = productsData.reduce(
+    (total, product) => total + product.stock_damaged,
+    0
+  );
 
-const totalAvailable = productsData.reduce(
-  (total, product) =>
-    total +
-    (product.stock_current -
+  const totalAvailable = productsData.reduce(
+    (total, product) =>
+      total +
+      (
+        product.stock_current -
+        product.stock_expired -
+        product.stock_damaged
+      ),
+    0
+  );
+
+  const lowStock = productsData.filter((product) => {
+
+    const available =
+      product.stock_current -
       product.stock_expired -
-      product.stock_damaged),
-  0
-);
+      product.stock_damaged;
 
-const totalProducts = productsData.length;
+    return available <= product.stock_min;
 
-  const lowStock = productsData.filter(
-    (product) => product.stock_current <= 20
-  ).length;
+  }).length;
 
   return (
 
@@ -80,44 +88,45 @@ const totalProducts = productsData.length;
           <p className="text-slate-500">
             Stock Total
           </p>
-          <div className="bg-white rounded-3xl shadow-lg p-6">
-
-  <p className="text-slate-500">
-    Disponible
-  </p>
-
-  <h2 className="text-4xl font-bold mt-2 text-green-600">
-    {totalAvailable}
-  </h2>
-
-</div>
-
-<div className="bg-white rounded-3xl shadow-lg p-6">
-
-  <p className="text-slate-500">
-    Vencidos
-  </p>
-
-  <h2 className="text-4xl font-bold mt-2 text-yellow-600">
-    {totalExpired}
-  </h2>
-
-</div>
-
-<div className="bg-white rounded-3xl shadow-lg p-6">
-
-  <p className="text-slate-500">
-    Dañados
-  </p>
-
-  <h2 className="text-4xl font-bold mt-2 text-red-600">
-    {totalDamaged}
-  </h2>
-
-</div>
 
           <h2 className="text-4xl font-bold mt-2 text-cyan-700">
             {totalStock}
+          </h2>
+
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-lg p-6">
+
+          <p className="text-slate-500">
+            Disponible
+          </p>
+
+          <h2 className="text-4xl font-bold mt-2 text-green-600">
+            {totalAvailable}
+          </h2>
+
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-lg p-6">
+
+          <p className="text-slate-500">
+            Vencidos
+          </p>
+
+          <h2 className="text-4xl font-bold mt-2 text-yellow-600">
+            {totalExpired}
+          </h2>
+
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-lg p-6">
+
+          <p className="text-slate-500">
+            Dañados
+          </p>
+
+          <h2 className="text-4xl font-bold mt-2 text-red-600">
+            {totalDamaged}
           </h2>
 
         </div>
@@ -140,11 +149,10 @@ const totalProducts = productsData.length;
 
       <div className="bg-white rounded-3xl shadow-lg mt-8 p-6 overflow-auto">
 
-        <table className="w-full">
+        <table className="w-full min-w-[1200px]">
 
           <thead className="bg-slate-100">
-
-            <tr>
+                        <tr>
 
               <th className="p-4 text-left">
                 Imagen
@@ -162,12 +170,28 @@ const totalProducts = productsData.length;
                 Precio
               </th>
 
-              <th className="p-4 text-left">
-                Stock
+              <th className="p-4 text-center">
+                Total
               </th>
 
-              <th className="p-4 text-left">
+              <th className="p-4 text-center">
+                Disponible
+              </th>
+
+              <th className="p-4 text-center">
+                Vencidos
+              </th>
+
+              <th className="p-4 text-center">
+                Dañados
+              </th>
+
+              <th className="p-4 text-center">
                 Estado
+              </th>
+
+              <th className="p-4 text-center">
+                Acción
               </th>
 
             </tr>
@@ -176,72 +200,151 @@ const totalProducts = productsData.length;
 
           <tbody>
 
-            {productsData.map((product) => (
+            {productsData.map((product) => {
 
-              <tr
-                key={product.id}
-                className="border-t hover:bg-slate-50 transition"
-              >
+              const available =
+                product.stock_current -
+                product.stock_expired -
+                product.stock_damaged;
 
-                <td className="p-4">
+              return (
 
-                  <img
-                    src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
-                    alt={product.name}
-                    className="w-16 h-16 rounded-xl object-cover"
-                  />
+                <tr
+                  key={product.id}
+                  className="border-t hover:bg-slate-50 transition"
+                >
 
-                </td>
+                  <td className="p-4">
 
-                <td className="p-4 font-semibold">
+                    <img
+                      src={
+                        product.imageUrl ||
+                        "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"
+                      }
+                      alt={product.name}
+                      className="w-16 h-16 rounded-xl object-cover"
+                    />
 
-                  {product.name}
+                  </td>
 
-                </td>
+                  <td className="p-4 font-semibold">
 
-                <td className="p-4">
+                    {product.name}
 
-                  {getCategoryName(product.category_id, categories)}
+                  </td>
 
-                </td>
+                  <td className="p-4">
 
-                <td className="p-4 font-bold text-cyan-700">
+                    {getCategoryName(
+                      product.category_id,
+                      categories
+                    )}
 
-                  C$ {product.price_sell}
+                  </td>
 
-                </td>
+                  <td className="p-4 font-bold text-cyan-700">
 
-                <td className="p-4 font-semibold">
+                    C$ {product.price_sell}
 
-                  {product.stock_current}
+                  </td>
 
-                </td>
+                  <td className="p-4 text-center font-semibold">
 
-                <td className="p-4">
+                    {product.stock_current}
 
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      product.stock_current <= 20
-                        ? "bg-red-100 text-red-700"
-                        : "bg-green-100 text-green-700"
-                    }`}
-                  >
-                    {product.stock_current <= 20
-                      ? "Stock Bajo"
-                      : "Disponible"}
-                  </span>
+                  </td>
 
-                </td>
+                  <td className="p-4 text-center font-bold text-green-600">
 
-              </tr>
+                    {available}
 
-            ))}
+                  </td>
+
+                  <td className="p-4 text-center font-bold text-yellow-600">
+
+                    {product.stock_expired}
+
+                  </td>
+
+                  <td className="p-4 text-center font-bold text-red-600">
+
+                    {product.stock_damaged}
+
+                  </td>
+
+                  <td className="p-4 text-center">
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        available <= product.stock_min
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+
+                      {available <= product.stock_min
+                        ? "Stock Bajo"
+                        : "Disponible"}
+
+                    </span>
+
+                  </td>
+
+                  <td className="p-4 text-center">
+
+                    <button
+                      onClick={() => {
+
+                        setSelectedProduct(product);
+                        setOpenModal(true);
+
+                      }}
+                      className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-xl transition"
+                    >
+
+                      Editar
+
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              );
+
+            })}
 
           </tbody>
 
         </table>
 
       </div>
+            <InventoryModal
+        open={openModal}
+        product={selectedProduct || undefined}
+        onClose={() => {
+          setOpenModal(false);
+          setSelectedProduct(null);
+        }}
+        onSave={(id, data) => {
+
+          updateProduct.mutate(
+            {
+              id,
+              data,
+            },
+            {
+              onSuccess: () => {
+
+                setOpenModal(false);
+                setSelectedProduct(null);
+
+              },
+            }
+          );
+
+        }}
+      />
 
     </div>
 

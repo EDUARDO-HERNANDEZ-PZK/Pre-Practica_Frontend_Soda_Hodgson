@@ -20,10 +20,15 @@ export default function Products() {
   const [search, setSearch] = useState("");
 
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products.filter((product) => {
 
+  const productName = product?.name ?? "";
+
+  return productName
+    .toLowerCase()
+    .includes(search.toLowerCase());
+
+});
   const saveProduct = async (product: CreateProductDto) => {
 
     await createProduct.mutateAsync(product);

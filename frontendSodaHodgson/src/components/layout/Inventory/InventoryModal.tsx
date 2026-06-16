@@ -172,7 +172,6 @@ export default function InventoryModal({
                 onSave(product.id, form);
               }
 
-              onClose();
 
             }}
             className="bg-cyan-600 text-white px-5 py-3 rounded-xl"
