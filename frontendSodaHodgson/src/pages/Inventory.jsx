@@ -347,21 +347,31 @@ Number(product.stock_damaged ?? 0);
           setSelectedProduct(null);
         }}
         onSave={(id, data) => {
+if (selectedProduct) {
+      // Unimos de forma atómica el producto completo con los cambios del DTO
+      // Esto blinda el precio, costo, imagen, stock mínimo, etc.
+      const productPayload = {
+        ...selectedProduct,       // Mantiene todos los campos existentes (incluyendo price, etc.)
+        stock_current: Number(data.stock_current) || 0,
+        stock_expired: Number(data.stock_expired) || 0,
+        stock_damaged: Number(data.stock_damaged) || 0,
+        name: selectedProduct.name,
+        category_id: selectedProduct.category_id
+      };
 
-          updateProduct.mutate(
-            {
-              id,
-              data,
-            },
-            {
-              onSuccess: () => {
-
-                setOpenModal(false);
-                setSelectedProduct(null);
-
-              },
-            }
-          );
+      updateProduct.mutate(
+        {
+          id,
+          data: productPayload, // Enviamos el objeto con el ciclo de vida completo
+        },
+        {
+          onSuccess: () => {
+            setOpenModal(false);
+            setSelectedProduct(null);
+          },
+        }
+      );
+    }
 
         }}
       />
