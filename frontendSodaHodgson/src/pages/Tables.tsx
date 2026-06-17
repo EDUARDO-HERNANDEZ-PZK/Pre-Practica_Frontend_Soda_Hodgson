@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTables } from "../hooks/useTables";
+import { useCreateTable, useDeleteTable, useTables, useUpdateTable } from "../hooks/useTables";
+import { Table } from "../models/Table";
 
 // 1. Definimos un tipo estricto para los estados de la mesa
 export type TableStatus = "Disponible" | "Ocupada" | "Reservada";
@@ -12,20 +13,19 @@ const statusColors: Record<TableStatus, string> = {
   Reservada: "bg-yellow-100 text-yellow-700",
 };
 
-// 3. Interfaz de la entidad Mesa
-export interface Table {
-  id: string | number;
-  table_number: string | number;
-  status: TableStatus;
-}
 
 export default function Tables() {
   const { data: initialTables = [] } = useTables() as { data: Table[] };
+  const createTable = useCreateTable();
+
+  const updateTable = useUpdateTable();
+
+  const deleteTable = useDeleteTable();
   const navigate = useNavigate();
 
   // Estado de las mesas en pantalla
   const [tables, setTables] = useState<Table[]>([]);
-  
+
   // Modales de control
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingTable, setEditingTable] = useState<Table | null>(null);
@@ -46,44 +46,73 @@ export default function Tables() {
   };
 
   // Crear nueva mesa
-  const handleSelectStatusAndCreate = (selectedStatus: TableStatus) => {
+  const handleSelectStatusAndCreate = (
+    selectedStatus: TableStatus
+  ) => {
+
     const maxNumber = tables.reduce((max, t) => {
+
       const num = Number(t.table_number);
-      return !isNaN(num) && num > max ? num : max;
+
+      return !isNaN(num) && num > max
+        ? num
+        : max;
+
     }, 0);
 
-    const nextNumber = maxNumber + 1;
-
-    const newTable: Table = {
-      id: `temp-${Date.now()}`, 
-      table_number: nextNumber,
-      status: selectedStatus,
-    };
-
-    setTables([...tables, newTable]);
-    setIsCreateModalOpen(false);
+    createTable.mutate({
+      table_number: maxNumber + 1,
+      status: selectedStatus
+    },
+      {
+        onSuccess: () => {
+          setIsCreateModalOpen(false);
+        }
+      });
   };
 
   // Cambiar estado de mesa existente
-  const handleChangeStatusExisting = (selectedStatus: TableStatus) => {
+  const handleChangeStatusExisting = (
+    selectedStatus: TableStatus
+  ) => {
+
     if (!editingTable) return;
-    setTables(tables.map((t) => t.id === editingTable.id ? { ...t, status: selectedStatus } : t));
-    setEditingTable(null);
+
+    updateTable.mutate({
+      id: String(editingTable.id),
+      data: {
+        table_number: editingTable.table_number,
+        status: selectedStatus
+      }
+    },
+      {
+        onSuccess: () => {
+          setEditingTable(null);
+        }
+      });
   };
 
   // Confirmación de borrado
-  const handleDeleteTable = (e: React.MouseEvent, table: Table) => {
+  const handleDeleteTable = (
+    e: React.MouseEvent,
+    table: Table
+  ) => {
     e.stopPropagation();
-    const confirmar = window.confirm(`¿Estás seguro de que deseas eliminar la Mesa ${table.table_number}?`);
+    const confirmar = window.confirm(
+      `¿Estás seguro de que deseas eliminar la Mesa ${table.table_number}?`
+    );
+
     if (confirmar) {
-      setTables(tables.filter((t) => t.id !== table.id));
+      deleteTable.mutate(
+        String(table.id)
+      );
     }
   };
 
   return (
     // He quitado 'pb-28' del contenedor principal ya que el botón no es flotante
     <div className="p-8 flex-1 select-none relative min-h-screen pb-12">
-      
+
       {/* CABECERA: Título y el NUEVO Botón "Add New" Verde */}
       <div className="flex items-center justify-between mb-12">
         <h1 className="text-4xl font-bold text-gray-800">

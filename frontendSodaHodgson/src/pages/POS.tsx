@@ -63,7 +63,7 @@ const POS: React.FC = () => {
 
   // FILTRAR PRODUCTOS
   const filteredProducts = productList.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase()),
+    (product.name ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   // AGREGAR PRODUCTO
