@@ -25,29 +25,49 @@ export default function Inventory() {
   const totalProducts = productsData.length;
 
   const totalStock = productsData.reduce(
-    (total, product) => total + product.stock_current,
-    0
-  );
+(total, product) =>
+total + Number(product.stock_current ?? 0),
+0
+);
 
-  const totalExpired = productsData.reduce(
-    (total, product) => total + product.stock_expired,
-    0
-  );
 
-  const totalDamaged = productsData.reduce(
-    (total, product) => total + product.stock_damaged,
-    0
-  );
+const totalExpired = productsData.reduce(
+(total, product) =>
+total + Number(product.stock_expired ?? 0),
+0
+);
 
-  const totalAvailable = productsData.reduce(
-    (total, product) =>
-      total +
-      (
-        product.stock_current -
-        product.stock_expired -
-        product.stock_damaged
-      ),
-    0
+
+const totalDamaged = productsData.reduce(
+(total, product) =>
+total + Number(product.stock_damaged ?? 0),
+0
+);
+
+
+const totalAvailable = productsData.reduce(
+(total, product) => {
+
+
+const current =
+Number(product.stock_current ?? 0);
+
+
+const expired =
+Number(product.stock_expired ?? 0);
+
+
+    const damaged =
+    Number(product.stock_damaged ?? 0);
+
+      return total + (
+      current -
+      expired -
+      damaged
+      );
+
+      },
+      0
   );
 
   const lowStock = productsData.filter((product) => {
@@ -203,9 +223,9 @@ export default function Inventory() {
             {productsData.map((product) => {
 
               const available =
-                product.stock_current -
-                product.stock_expired -
-                product.stock_damaged;
+Number(product.stock_current ?? 0) -
+Number(product.stock_expired ?? 0) -
+Number(product.stock_damaged ?? 0);
 
               return (
 
