@@ -64,27 +64,47 @@ export default function ExpenseModal({
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
+  <button
+    onClick={() => {
+      setDescription("");
+      setAmount("");
+      onClose();
+    }}
+    
+  >
+    Cancelar
+  </button>
 
-          <button
-            onClick={onClose}
-            className="bg-slate-300 px-5 py-3 rounded-xl"
-          >
-            Cancelar
-          </button>
+  <button
+    onClick={() => {
 
-          <button
-            onClick={() =>
-              onSave({
-                description,
-                amount: Number(amount),
-              })
-            }
-            className="bg-cyan-600 text-white px-5 py-3 rounded-xl"
-          >
-            Guardar
-          </button>
+      if (!description.trim()) {
+        alert("Debe ingresar una descripción");
+        return;
+      }
 
-        </div>
+      if (!amount || Number(amount) <= 0) {
+        alert("Debe ingresar un monto válido");
+        return;
+      }
+
+      onSave({
+        description,
+        amount: Number(amount),
+      });
+
+      setDescription("");
+      setAmount("");
+
+      onClose();
+
+    }}
+    className="bg-cyan-600 hover:bg-cyan-700 text-white px-5 py-3 rounded-xl"
+  >
+    Guardar
+  </button>
+
+</div>
 
       </div>
     </div>

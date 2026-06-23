@@ -14,7 +14,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         </h1>
 
         <p className="text-slate-500">
-          Sistema Soda Hodgason
+          Sistema Soda Hodgson
         </p>
       </div>
 

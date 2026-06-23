@@ -140,16 +140,43 @@ const POS: React.FC = () => {
 
   // FINALIZAR VENTA
   const finishSale = async () => {
-    try {
-      // 1. Crear encabezado de venta
-      const sale = await createSale.mutateAsync({
-        session_id: "SESSION_ID",
-        table_id: selectedTable?.id ?? "venta rapida",
-        user_creator_id: "USER_ID",
-        ruc_number: "no-tener",
-        sale_time: new Date(),
-        status: "COMPLETED",
-      });
+    if (!cash || Number(cash) <= 0) {
+  alert("Debe ingresar un monto mayor que C$ 0");
+  return;
+}
+
+  if (cart.length === 0) {
+    alert("No puede realizar una venta sin productos");
+    return;
+  }
+
+  if (total <= 0) {
+    alert("No se puede realizar una venta en C$ 0");
+    return;
+  }
+
+  try {
+
+    const sale = await createSale.mutateAsync({
+      session_id: "SESSION_ID",
+      table_id: selectedTable?.id ?? "venta rapida",
+      user_creator_id: "USER_ID",
+      ruc_number: "no-tener",
+      sale_time: new Date(),
+      status: "COMPLETED",
+    });
+
+    await Promise.all(
+      cart.map((item) =>
+        createSalesDetail.mutateAsync({
+          sale_id: sale.id,
+          product_id: item.product.id,
+          quantity: item.quantity,
+          unit_price: item.product.price_sell,
+          subtotal: item.subtotal,
+        })
+      )
+    );
 
       // 2. Crear detalles
       await Promise.all(
@@ -395,14 +422,14 @@ const POS: React.FC = () => {
                 placeholder="0" // El cero ahora es un placeholder gris y transparente
                 value={cash} 
                 onChange={(e) => {
-                  const val = e.target.value;
-                  // Si intentan meter dígitos nuevos sobre un cero inicial, lo limpia limpiamente
-                  if (val.length > 1 && val.startsWith("0")) {
-                    setCash(val.slice(1));
-                  } else {
-                    setCash(val);
-                  }
-                }} 
+  const value = Number(e.target.value);
+
+  if (value < 0) {
+    return;
+  }
+
+  setCash(e.target.value);
+}}
                 onFocus={(e) => e.target.select()} // Al dar clic, autoselecciona todo para escribir rápido
                 className="w-full border-2 border-slate-200 focus:border-green-500 rounded-2xl p-4 mt-2 outline-none text-xl font-semibold transition-all" 
               />
@@ -423,15 +450,23 @@ const POS: React.FC = () => {
 
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowModal(false)} className="bg-slate-200 hover:bg-slate-300 w-full p-4 rounded-2xl font-bold text-slate-700 transition">Cancelar</button>
-              <button 
-                onClick={finishSale} 
-                disabled={cash !== "" && Number(cash) < total}
-                className={`w-full p-4 rounded-2xl font-bold text-white transition ${
-                  cash !== "" && Number(cash) < total ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-                }`}
-              >
-                Finalizar
-              </button>
+             <button
+  onClick={finishSale}
+  disabled={
+    total <= 0 ||
+    cart.length === 0 ||
+    (cash !== "" && Number(cash) < total)
+  }
+  className={`w-full p-4 rounded-2xl font-bold text-white transition ${
+    total <= 0 ||
+    cart.length === 0 ||
+    (cash !== "" && Number(cash) < total)
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-600 hover:bg-green-700"
+  }`}
+>
+  Finalizar
+</button>
             </div>
           </div>
         </div>

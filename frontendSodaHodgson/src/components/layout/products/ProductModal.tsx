@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { CreateProductDto, Product, UpdateProductDto } from "../../../models/Product";
 import { useCategories } from "../../../hooks/useCategories";
-
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -41,6 +40,13 @@ const stockAvailable = Math.max(
     form.stock_damaged
 );
 
+const isFormValid =
+  form.name.trim() !== "" &&
+  form.category_id !== "" &&
+  form.price_sell > 0 &&
+  form.stock_current > 0 &&
+  form.stock_min > 0 &&
+  (form.stock_expired + form.stock_damaged <= form.stock_current);
   const resetForm = () => {
     setForm(initialForm);
   };
@@ -94,7 +100,7 @@ const stockAvailable = Math.max(
           </label>
           <input
             placeholder="Nombre"
-            value={form.name}
+            value={form.name || ""}
             onChange={(e) =>
               setForm({
                 ...form,
@@ -121,7 +127,7 @@ const stockAvailable = Math.max(
           </label>
 
           <select
-            value={form.category_id}
+            value={form.category_id || ""}
             onChange={(e) =>
               setForm({
                 ...form,
@@ -148,7 +154,7 @@ const stockAvailable = Math.max(
           <input
             type="number"
             placeholder="Precio"
-            value={form.price_sell}
+            value={form.price_sell || ""}
             onChange={(e) =>
               setForm({
                 ...form,
@@ -163,7 +169,7 @@ const stockAvailable = Math.max(
           <input
             type="number"
             placeholder="Stock total"
-            value={form.stock_current}
+            value={form.stock_current || ""}
             onChange={(e) =>
               setForm({
                 ...form,
@@ -180,7 +186,7 @@ const stockAvailable = Math.max(
 <input
   type="number"
   placeholder="Productos vencidos"
-  value={form.stock_expired}
+  value={form.stock_expired || ""}
   onChange={(e) =>
     setForm({
       ...form,
@@ -197,7 +203,7 @@ const stockAvailable = Math.max(
 <input
   type="number"
   placeholder="Productos dañados"
-  value={form.stock_damaged}
+  value={form.stock_damaged || ""}
   onChange={(e) =>
     setForm({
       ...form,
@@ -220,25 +226,30 @@ const stockAvailable = Math.max(
           <label className="block mb-2 font-medium">
             Stock minimo
           </label>
-          <input
-            type="number"
-            placeholder="Stock minimo"
-            value={form.stock_min}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                stock_min: e.target.valueAsNumber || 0,
-              })
-            }
-            className="w-full border rounded-xl p-3"
-          />
+        <input
+  type="number"
+  placeholder="Stock minimo"
+  value={form.stock_min || ""}
+  onFocus={(e) => {
+    if (e.target.value === "0") {
+      e.target.select();
+    }
+  }}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      stock_min: e.target.valueAsNumber || 0,
+    })
+  }
+  className="w-full border rounded-xl p-3"
+/>
 
         </div>
 
         <div className="flex justify-end gap-3 mt-8">
 
           <button
-           onClick={() => {
+        onClick={() => {
 
   if (
     form.stock_expired + form.stock_damaged >
@@ -266,19 +277,61 @@ const stockAvailable = Math.max(
 
           <button
             onClick={() => {
-              if (product) {
-                onEditProduct(product.id, form);
-              } else {
-                onSave(form);
-              }
 
-              resetForm();
-              onClose();
-            }}
-            className="bg-cyan-600 text-white px-5 py-3 rounded-xl"
-          >
-            Guardar
-          </button>
+  if (!form.name.trim()) {
+    alert("Debe ingresar el nombre del producto");
+    return;
+  }
+
+  if (!form.category_id) {
+    alert("Debe seleccionar una categoría");
+    return;
+  }
+
+  if (form.price_sell <= 0) {
+    alert("Debe ingresar un precio válido");
+    return;
+  }
+
+  if (form.stock_current <= 0) {
+    alert("Debe ingresar el stock total");
+    return;
+  }
+
+  if (form.stock_min <= 0) {
+    alert("Debe ingresar el stock mínimo");
+    return;
+  }
+
+  if (
+    form.stock_expired +
+    form.stock_damaged >
+    form.stock_current
+  ) {
+    alert(
+      "Los productos vencidos y dañados no pueden ser mayores al stock total"
+    );
+    return;
+  }
+
+  if (product) {
+  onEditProduct(product.id, form);
+} else {
+  onSave(form);
+}
+
+resetForm();
+onClose();
+}}
+className={`px-5 py-3 rounded-xl text-white font-semibold transition ${
+  isFormValid
+    ? "bg-green-600 hover:bg-green-700"
+    : "bg-gray-400 cursor-not-allowed"
+}`}
+disabled={!isFormValid}
+>
+  Guardar
+</button>
 
         </div>
 

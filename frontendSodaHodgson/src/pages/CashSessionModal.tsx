@@ -37,37 +37,41 @@ export default function CashSessionModal({
         <h2 className="text-2xl font-bold mb-6">
           Apertura de Caja
         </h2>
-
         <input
-          type="number"
-          placeholder="Saldo Inicial"
-          value={openingBalance}
-          onChange={(e) =>
-            setOpeningBalance(e.target.value)
-          }
-          className="w-full border rounded-xl p-3"
-        />
+  type="number"
+  min={1}
+  placeholder="Saldo Inicial"
+  value={openingBalance}
+  onChange={(e) =>
+    setOpeningBalance(e.target.value)
+  }
+  className="w-full border rounded-xl p-3"
+/>
 
         <div className="flex justify-end gap-3 mt-6">
-
           <button
-            onClick={onClose}
-            className="bg-slate-300 px-5 py-3 rounded-xl"
-          >
-            Cancelar
-          </button>
+  onClick={onClose}
+  className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl"
+>
+  Cancelar
+</button>
+<button
+  onClick={() => {
 
-          <button
-            onClick={() =>
-              onSave({
-                opening_balance:
-                  Number(openingBalance),
-              })
-            }
-            className="bg-green-600 text-white px-5 py-3 rounded-xl"
-          >
-            Guardar
-          </button>
+    if (!openingBalance || Number(openingBalance) <= 0) {
+      alert("El saldo inicial debe ser mayor a 0");
+      return;
+    }
+
+    onSave({
+      opening_balance: Number(openingBalance),
+    });
+
+  }}
+  className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl"
+>
+  Guardar
+</button>
 
         </div>
 

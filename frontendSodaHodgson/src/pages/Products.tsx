@@ -31,12 +31,17 @@ export default function Products() {
 });
   const saveProduct = async (product: CreateProductDto) => {
 
-    await createProduct.mutateAsync(product);
+  if (!product.name || product.name.trim() === "") {
+    alert("El nombre del producto es obligatorio");
+    return;
+  }
 
-    setShowModal(false);
-    setEditingProduct(null);
+  await createProduct.mutateAsync(product);
 
-  };
+  setShowModal(false);
+  setEditingProduct(null);
+
+};
 
   const onEditProduct = async (id: string, product: UpdateProductDto) => {
 
