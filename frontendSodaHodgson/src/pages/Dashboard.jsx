@@ -86,7 +86,7 @@ const salesChartData = {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
 
         <StatCard
-          title="Ventas Hoy"
+          title="Apertura de Caja"
           value={`C$ ${ingresos}`}
           color="text-cyan-600"
         />
