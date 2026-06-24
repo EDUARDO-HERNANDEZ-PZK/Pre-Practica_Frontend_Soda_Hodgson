@@ -22,26 +22,26 @@ export default function Products() {
 
   const filteredProducts = products.filter((product) => {
 
-  const productName = product?.name ?? "";
+    const productName = product?.name ?? "";
 
-  return productName
-    .toLowerCase()
-    .includes(search.toLowerCase());
+    return productName
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-});
+  });
   const saveProduct = async (product: CreateProductDto) => {
 
-  if (!product.name || product.name.trim() === "") {
-    alert("El nombre del producto es obligatorio");
-    return;
-  }
+    if (!product.name || product.name.trim() === "") {
+      alert("El nombre del producto es obligatorio");
+      return;
+    }
 
-  await createProduct.mutateAsync(product);
+    await createProduct.mutateAsync(product);
 
-  setShowModal(false);
-  setEditingProduct(null);
+    setShowModal(false);
+    setEditingProduct(null);
 
-};
+  };
 
   const onEditProduct = async (id: string, product: UpdateProductDto) => {
 
@@ -54,12 +54,16 @@ export default function Products() {
     setEditingProduct(null);
   }
 
-  const onDeleteProduct = async (id: string) => {
+  const onDeleteProduct = async (product: any) => {
+    if (!window.confirm("¿Marcar producto como no disponible?")) return;
 
-    if (!window.confirm("¿Eliminar este producto?")) return;
-
-    await deleteProduct.mutateAsync(id);
-
+    await updateProduct.mutateAsync({
+      id: product.id,
+      data: {
+        ...product,
+        description: "No disponible",
+      },
+    });
   };
 
   const editProduct = (product: any) => {
@@ -166,7 +170,7 @@ export default function Products() {
 
                     onEdit={() => editProduct(product)}
 
-                    onDelete={() => onDeleteProduct(product.id)}
+                    onDelete={() => onDeleteProduct(product)}
 
                   />
 
@@ -242,7 +246,7 @@ export default function Products() {
                           </button>
 
                           <button
-                            onClick={() => onDeleteProduct(product.id)}
+                            onClick={() => onDeleteProduct(product)}
                             className="bg-red-500 text-white px-4 py-2 rounded-xl"
                           >
                             Eliminar

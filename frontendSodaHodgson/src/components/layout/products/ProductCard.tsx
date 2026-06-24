@@ -112,17 +112,14 @@ export default function ProductCard({
         <div className="mt-5">
 
           <span
-            className="
-            bg-emerald-100
-            text-emerald-700
-            px-4
-            py-2
-            rounded-full
-            text-sm
-            font-semibold
-            "
+            className={`px-3 py-1 rounded-full text-sm ${product.description === "No disponible"
+                ? "bg-red-100 text-red-600"
+                : "bg-green-100 text-green-600"
+              }`}
           >
-            Disponible
+            {product.description === "No disponible"
+              ? "No disponible"
+              : "Disponible"}
           </span>
 
         </div>

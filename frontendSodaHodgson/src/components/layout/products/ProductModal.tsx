@@ -21,7 +21,7 @@ export default function ProductModal({
 
   const initialForm: CreateProductDto = {
     name: "",
-    description: "",
+    description: "Disponible",
     category_id: "",
     unit_id: "",
     price_sell: 0,
