@@ -2,6 +2,19 @@ import { Link } from "react-router-dom";
 import React from "react";
 
 const Sidebar: React.FC = () => {
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  const ADMIN = "575201e5b377c1d2";
+  const MESERO = "0c428135d40c483f";
+  const CAJERO = "11668d17834b3deb";
+
+  const isAdmin = user.role_id === ADMIN;
+  const isMesero = user.role_id === MESERO;
+  const isCajero = user.role_id === CAJERO;
+
   return (
     <aside
       className="
@@ -32,11 +45,12 @@ const Sidebar: React.FC = () => {
 
       {/* MENU */}
 
-    <nav className="flex flex-col gap-4">
-
-  <Link
-    to="/"
-    className="
+      <nav className="flex flex-col gap-4">
+        {/* dashboard solo el admin */}
+        {(isAdmin || isCajero) && (
+          <Link
+            to="/"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -47,13 +61,16 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    📊 Dashboard
-  </Link>
+          >
+            📊 Dashboard
+          </Link>
+        )}
 
-  <Link
-    to="/pos"
-    className="
+        {/* POS: Admin y Mesero */}
+        {(isAdmin || isMesero) && (
+          <Link
+            to="/pos"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -64,13 +81,16 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    💳 Caja POS
-  </Link>
+          >
+            💳 Caja POS
+          </Link>
+        )}
 
-  <Link
-    to="/tables"
-    className="
+        {/* Mesas: Admin, Mesero y Cajero */}
+        {(isAdmin || isMesero || isCajero) && (
+          <Link
+            to="/tables"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -81,13 +101,16 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    🍽 Mesas
-  </Link>
+          >
+            🍽 Mesas
+          </Link>
+        )}
 
-  <Link
-    to="/products"
-    className="
+        {/* Productos: Admin y Cajero */}
+        {(isAdmin || isCajero) && (
+          <Link
+            to="/products"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -98,13 +121,15 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    🍔 Productos
-  </Link>
-
-  <Link
-    to="/inventory"
-    className="
+          >
+            🍔 Productos
+          </Link>
+        )}
+        {/* Inventario: Admin y Cajero */}
+        {(isAdmin || isCajero) && (
+          <Link
+            to="/inventory"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -115,13 +140,16 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    📦 Inventario
-  </Link>
+          >
+            📦 Inventario
+          </Link>
+        )}
 
-  <Link
-    to="/cash"
-    className="
+        {/* Caja: solo Admin */}
+        {(isAdmin || isMesero || isCajero) && (
+          <Link
+            to="/cash"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -132,13 +160,16 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    💵 Caja
-  </Link>
+          >
+            💵 Caja
+          </Link>
+        )}
 
-  <Link
-    to="/users"
-    className="
+        {/* Usuarios: solo Admin */}
+        {isAdmin && (
+          <Link
+            to="/users"
+            className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -149,22 +180,23 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-  >
-    👤 Usuarios
-  </Link>
+          >
+            👤 Usuarios
+          </Link>
+        )}
 
-</nav>
-<button
+      </nav>
+      <button
 
-  onClick={() => {
+        onClick={() => {
 
-    localStorage.removeItem("user");
+          localStorage.removeItem("user");
 
-    window.location.href = "/login";
+          window.location.href = "/login";
 
-  }}
+        }}
 
-  className="
+        className="
   mt-6
   bg-red-600
   hover:bg-red-700
@@ -176,11 +208,11 @@ const Sidebar: React.FC = () => {
   w-full
   "
 
->
+      >
 
-  🚪 Cerrar Sesión
+        🚪 Cerrar Sesión
 
-</button>
+      </button>
       {/* FOOTER */}
 
       <div className="mt-12 border-t border-slate-700 pt-6">
