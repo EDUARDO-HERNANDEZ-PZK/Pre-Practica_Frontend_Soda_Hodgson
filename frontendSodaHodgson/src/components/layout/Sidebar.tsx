@@ -19,7 +19,8 @@ const Sidebar: React.FC = () => {
     <aside
       className="
       w-full
-      md:w-72
+      md:min-w-[15rem]
+      md:max-w-[15rem]
       md:min-h-screen
       bg-gradient-to-b
       from-slate-900
