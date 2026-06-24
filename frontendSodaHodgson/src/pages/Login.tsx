@@ -25,6 +25,7 @@ export default function Login() {
 
     if (!user) {
       setError("Usuario o contraseña incorrectos");
+      setPassword("");
       return;
     }
 
