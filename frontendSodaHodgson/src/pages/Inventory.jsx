@@ -169,7 +169,7 @@ Number(product.stock_expired ?? 0);
 
       <div className="bg-white rounded-3xl shadow-lg mt-8 p-6 overflow-auto">
 
-        <table className="w-full min-w-[1200px]">
+        <table className="w-full min-w-[200px]">
 
           <thead className="bg-slate-100">
                         <tr>
