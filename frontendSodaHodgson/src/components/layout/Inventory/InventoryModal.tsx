@@ -47,13 +47,16 @@ export default function InventoryModal({
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
 
-      <div className="bg-white rounded-3xl w-full max-w-lg mx-4 p-8 shadow-2xl">
+      {/* Agregamos flex y flex-col a la tarjeta blanca junto con un max-h dinámico */}
+      <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl max-h-[85vh] flex flex-col">
 
-        <h2 className="text-3xl font-bold mb-6">
+        {/* TÍTULO: Se queda fijo arriba */}
+        <h2 className="text-3xl font-bold mb-6 flex-shrink-0">
           Inventario Diario
         </h2>
 
-        <div className="space-y-4">
+        {/* CONTENEDOR CON SCROLL: flex-1 le permite ocupar el espacio estirable, pr-2 evita que el scroll tape los inputs */}
+        <div className="space-y-4 overflow-y-auto flex-1 pr-2 min-h-0">
 
           <div>
             <label className="block mb-2 font-medium">
@@ -106,13 +109,16 @@ export default function InventoryModal({
             </label>
             <input
               type="number"
-              value={form.stock_damaged}
+              // Si el valor es 0, lo mostramos como "" para que no estorbe al dar clic, o simplemente pasamos el valor tal cual
+              value={form.stock_damaged === 0 ? "" : form.stock_damaged}
               onChange={(e) =>
                 setForm({
                   ...form,
-                  stock_damaged: e.target.valueAsNumber || 0,
+                  // Si el usuario borra todo, guardamos 0. Si escribe, lo convertimos a número inmediatamente.
+                  stock_damaged: e.target.value === "" ? 0 : Number(e.target.value),
                 })
               }
+              placeholder="0" // Agregamos un placeholder para que se siga viendo un 0 gris cuando esté vacío
               className="w-full border rounded-xl p-3"
             />
           </div>
@@ -128,11 +134,12 @@ export default function InventoryModal({
 
         </div>
 
-        <div className="flex justify-end gap-3 mt-8">
+        {/* BOTONES: Se quedan fijos abajo */}
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100 flex-shrink-0">
 
           <button
             onClick={onClose}
-            className="bg-slate-300 px-5 py-3 rounded-xl"
+            className="bg-slate-300 px-5 py-3 rounded-xl hover:bg-slate-400 transition"
           >
             Cancelar
           </button>
@@ -149,12 +156,8 @@ export default function InventoryModal({
               }
 
               if (product) {
-                // SOLUCIÓN DEFINITIVA:
-                // Pasamos absolutamente TODO el producto original (...product)
-                // para que mantenga precios, imágenes, descripciones, etc., intactos,
-                // y encima sobreescribimos los stocks numéricos actualizados.
                 const payload = {
-                  ...product, 
+                  ...product,
                   stock_current: current,
                   stock_expired: expired,
                   stock_damaged: damaged,
@@ -163,7 +166,7 @@ export default function InventoryModal({
                 onSave(product.id, payload as unknown as UpdateProductDto);
               }
             }}
-            className="bg-cyan-600 text-white px-5 py-3 rounded-xl"
+            className="bg-cyan-600 text-white px-5 py-3 rounded-xl hover:bg-cyan-700 transition"
           >
             Guardar
           </button>
