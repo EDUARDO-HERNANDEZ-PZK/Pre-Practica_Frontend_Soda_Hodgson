@@ -6,18 +6,18 @@ import { InvoiceDetail } from "../models/Cart";
 import { Product } from "../models/Product";
 import { orders } from "../data/orders";
 import { productsService } from "../api/products";
-import { useTables, useUpdateTable } from "../hooks/useTables"; 
+import { useTables, useUpdateTable } from "../hooks/useTables";
 import { useCreateSalesDetail } from "../hooks/useSalesDetail";
 import { useCreateSale } from "../hooks/useSales";
 import { Table } from "../models/Table";
-import { useSearchParams } from "react-router-dom"; 
+import { useSearchParams } from "react-router-dom";
 
 const POS: React.FC = () => {
   const createSale = useCreateSale();
   const createSalesDetail = useCreateSalesDetail();
   const { data: tables = [] } = useTables();
-  const updateTable = useUpdateTable(); 
-  
+  const updateTable = useUpdateTable();
+
   const [searchParams] = useSearchParams();
   const tableParamId = searchParams.get("table");
 
@@ -26,7 +26,7 @@ const POS: React.FC = () => {
   const [saleType, setSaleType] = useState<"RAPIDA" | "MESA">("RAPIDA");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
-  
+
   // 🚀 MEJORA: El estado nace como un string vacío para permitir el placeholder transparente
   const [cash, setCash] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState("Efectivo");
@@ -78,10 +78,10 @@ const POS: React.FC = () => {
       const updated = cart.map((item) =>
         item.id === product.id
           ? {
-              ...item,
-              quantity: item.quantity + 1,
-              subtotal: (item.quantity + 1) * item.product.price_sell,
-            }
+            ...item,
+            quantity: item.quantity + 1,
+            subtotal: (item.quantity + 1) * item.product.price_sell,
+          }
           : item,
       );
 
@@ -113,10 +113,10 @@ const POS: React.FC = () => {
       const updated = cart.map((item) =>
         item.id === id
           ? {
-              ...item,
-              quantity: item.quantity - 1,
-              subtotal: (item.quantity - 1) * item.product.price_sell,
-            }
+            ...item,
+            quantity: item.quantity - 1,
+            subtotal: (item.quantity - 1) * item.product.price_sell,
+          }
           : item,
       );
 
@@ -141,42 +141,42 @@ const POS: React.FC = () => {
   // FINALIZAR VENTA
   const finishSale = async () => {
     if (!cash || Number(cash) <= 0) {
-  alert("Debe ingresar un monto mayor que C$ 0");
-  return;
-}
+      alert("Debe ingresar un monto mayor que C$ 0");
+      return;
+    }
 
-  if (cart.length === 0) {
-    alert("No puede realizar una venta sin productos");
-    return;
-  }
+    if (cart.length === 0) {
+      alert("No puede realizar una venta sin productos");
+      return;
+    }
 
-  if (total <= 0) {
-    alert("No se puede realizar una venta en C$ 0");
-    return;
-  }
+    if (total <= 0) {
+      alert("No se puede realizar una venta en C$ 0");
+      return;
+    }
 
-  try {
+    try {
 
-    const sale = await createSale.mutateAsync({
-      session_id: "SESSION_ID",
-      table_id: selectedTable?.id ?? "venta rapida",
-      user_creator_id: "USER_ID",
-      ruc_number: "no-tener",
-      sale_time: new Date(),
-      status: "COMPLETED",
-    });
+      const sale = await createSale.mutateAsync({
+        session_id: "SESSION_ID",
+        table_id: selectedTable?.id ?? "venta rapida",
+        user_creator_id: "USER_ID",
+        ruc_number: "no-tener",
+        sale_time: new Date(),
+        status: "COMPLETED",
+      });
 
-    await Promise.all(
-      cart.map((item) =>
-        createSalesDetail.mutateAsync({
-          sale_id: sale.id,
-          product_id: item.product.id,
-          quantity: item.quantity,
-          unit_price: item.product.price_sell,
-          subtotal: item.subtotal,
-        })
-      )
-    );
+      await Promise.all(
+        cart.map((item) =>
+          createSalesDetail.mutateAsync({
+            sale_id: sale.id,
+            product_id: item.product.id,
+            quantity: item.quantity,
+            unit_price: item.product.price_sell,
+            subtotal: item.subtotal,
+          })
+        )
+      );
 
       // 2. Crear detalles
       await Promise.all(
@@ -197,7 +197,7 @@ const POS: React.FC = () => {
           id: String(selectedTable.id),
           data: {
             ...selectedTable,
-            status: "Ocupada", 
+            status: "Ocupada",
           },
         });
       }
@@ -207,7 +207,7 @@ const POS: React.FC = () => {
         cart,
         total,
         paymentMethod,
-        cash: Number(cash) || 0, 
+        cash: Number(cash) || 0,
         change: cash ? Number(cash) - total : 0,
       });
 
@@ -224,6 +224,12 @@ const POS: React.FC = () => {
       alert("No se pudo registrar la venta");
     }
   };
+
+  const availableTables = tables.filter(
+    (table) =>
+      table.status === "Disponible" ||
+      table.status === "Reservada"
+  );
 
   useEffect(() => {
     loadProducts();
@@ -242,11 +248,10 @@ const POS: React.FC = () => {
               setSaleType("RAPIDA");
               setSelectedTable(null);
             }}
-            className={`p-6 rounded-3xl border-2 transition text-left ${
-              saleType === "RAPIDA"
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white border-slate-200 hover:border-blue-500"
-            }`}
+            className={`p-6 rounded-3xl border-2 transition text-left ${saleType === "RAPIDA"
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white border-slate-200 hover:border-blue-500"
+              }`}
           >
             <h3 className="text-2xl font-bold">🛍 Venta Rápida</h3>
             <p className="mt-2">Cliente para llevar</p>
@@ -254,11 +259,10 @@ const POS: React.FC = () => {
 
           <button
             onClick={() => setSaleType("MESA")}
-            className={`p-6 rounded-3xl border-2 transition text-left ${
-              saleType === "MESA"
-                ? "bg-green-600 text-white border-green-600"
-                : "bg-white border-slate-200 hover:border-green-500"
-            }`}
+            className={`p-6 rounded-3xl border-2 transition text-left ${saleType === "MESA"
+              ? "bg-green-600 text-white border-green-600"
+              : "bg-white border-slate-200 hover:border-green-500"
+              }`}
           >
             <h3 className="text-2xl font-bold">🍽 Consumo en Mesa</h3>
             <p className="mt-2">Cliente comerá en el restaurante</p>
@@ -267,21 +271,37 @@ const POS: React.FC = () => {
 
         {saleType === "MESA" && (
           <div className="mt-6">
-            <label className="font-semibold text-slate-700">Seleccionar Mesa</label>
+            <label className="font-semibold text-slate-700">
+              Seleccionar Mesa
+            </label>
+
             <select
               value={selectedTable?.table_number ?? ""}
               onChange={(e) => {
-                const table = tables.find((t) => t.table_number === Number(e.target.value));
+                const table = tables.find(
+                  (t) => t.table_number === Number(e.target.value)
+                );
+
                 setSelectedTable(table || null);
               }}
               className="w-full mt-3 p-4 border rounded-2xl"
             >
-              <option value="">Seleccionar Mesa</option>
-              {tables.map((table) => (
-                <option key={table.id} value={table.table_number}>
+
+              <option value="">
+                Seleccionar Mesa
+              </option>
+
+              {availableTables.map((table) => (
+
+                <option
+                  key={table.id}
+                  value={table.table_number}
+                >
                   Mesa {table.table_number} ({table.status})
                 </option>
+
               ))}
+
             </select>
           </div>
         )}
@@ -302,9 +322,8 @@ const POS: React.FC = () => {
               <h3 className="text-3xl font-bold mt-4">C$ {product.price_sell}</h3>
               <button
                 onClick={() => addProduct(product)}
-                className={`w-full mt-5 p-3 rounded-2xl font-semibold transition ${
-                  product.stock_current <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-600 text-white"
-                }`}
+                className={`w-full mt-5 p-3 rounded-2xl font-semibold transition ${product.stock_current <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-600 text-white"
+                  }`}
                 disabled={product.stock_current <= 0}
               >
                 {product.stock_current <= 0 ? "Sin Stock" : "Agregar"}
@@ -388,9 +407,8 @@ const POS: React.FC = () => {
             <button
               onClick={() => setShowModal(true)}
               disabled={cart.length === 0}
-              className={`px-10 py-4 rounded-2xl font-bold text-lg transition ${
-                cart.length === 0 ? "bg-slate-500 cursor-not-allowed text-white" : "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:scale-105"
-              }`}
+              className={`px-10 py-4 rounded-2xl font-bold text-lg transition ${cart.length === 0 ? "bg-slate-500 cursor-not-allowed text-white" : "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:scale-105"
+                }`}
             >
               💳 Cobrar
             </button>
@@ -404,7 +422,7 @@ const POS: React.FC = () => {
           <div className="bg-white rounded-[30px] p-8 w-full max-w-md shadow-2xl">
             <h2 className="text-3xl font-bold text-slate-800">Finalizar Venta</h2>
             <p className="text-slate-500 mt-2">Verifica el método de pago y confirma la transacción.</p>
-            
+
             <div className="mt-6">
               <label className="font-semibold text-slate-700">Método de Pago</label>
               <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full border rounded-2xl p-4 mt-2 outline-none focus:border-slate-400">
@@ -417,21 +435,21 @@ const POS: React.FC = () => {
             {/* 🚀 COMPORTAMIENTO INTELIGENTE DEL INPUT DEL DINERO RECIBIDO */}
             <div className="mt-4">
               <label className="font-semibold text-slate-700">Dinero Recibido</label>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 placeholder="0" // El cero ahora es un placeholder gris y transparente
-                value={cash} 
+                value={cash}
                 onChange={(e) => {
-  const value = Number(e.target.value);
+                  const value = Number(e.target.value);
 
-  if (value < 0) {
-    return;
-  }
+                  if (value < 0) {
+                    return;
+                  }
 
-  setCash(e.target.value);
-}}
+                  setCash(e.target.value);
+                }}
                 onFocus={(e) => e.target.select()} // Al dar clic, autoselecciona todo para escribir rápido
-                className="w-full border-2 border-slate-200 focus:border-green-500 rounded-2xl p-4 mt-2 outline-none text-xl font-semibold transition-all" 
+                className="w-full border-2 border-slate-200 focus:border-green-500 rounded-2xl p-4 mt-2 outline-none text-xl font-semibold transition-all"
               />
             </div>
 
@@ -450,23 +468,22 @@ const POS: React.FC = () => {
 
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowModal(false)} className="bg-slate-200 hover:bg-slate-300 w-full p-4 rounded-2xl font-bold text-slate-700 transition">Cancelar</button>
-             <button
-  onClick={finishSale}
-  disabled={
-    total <= 0 ||
-    cart.length === 0 ||
-    (cash !== "" && Number(cash) < total)
-  }
-  className={`w-full p-4 rounded-2xl font-bold text-white transition ${
-    total <= 0 ||
-    cart.length === 0 ||
-    (cash !== "" && Number(cash) < total)
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-green-600 hover:bg-green-700"
-  }`}
->
-  Finalizar
-</button>
+              <button
+                onClick={finishSale}
+                disabled={
+                  total <= 0 ||
+                  cart.length === 0 ||
+                  (cash !== "" && Number(cash) < total)
+                }
+                className={`w-full p-4 rounded-2xl font-bold text-white transition ${total <= 0 ||
+                  cart.length === 0 ||
+                  (cash !== "" && Number(cash) < total)
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+                  }`}
+              >
+                Finalizar
+              </button>
             </div>
           </div>
         </div>
