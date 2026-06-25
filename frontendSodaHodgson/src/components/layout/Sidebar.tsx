@@ -165,12 +165,11 @@ const Sidebar: React.FC = () => {
             💵 Caja
           </Link>
         )}
-
-        {/* Usuarios: solo Admin */}
-        {isAdmin && (
-          <Link
-            to="/users"
-            className="
+          {/* Historial de Ventas: Admin y Cajero */}
+{(isAdmin || isCajero) && (
+  <Link
+    to="/sales-history"
+    className="
     bg-slate-800
     hover:bg-cyan-600
     p-4
@@ -181,10 +180,30 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-          >
-            👤 Usuarios
-          </Link>
-        )}
+  >
+    🧾 Historial de Ventas
+  </Link>
+)}
+
+{/* Usuarios: solo Admin */}
+{isAdmin && (
+  <Link
+    to="/users"
+    className="
+    bg-slate-800
+    hover:bg-cyan-600
+    p-4
+    rounded-2xl
+    transition-all
+    duration-300
+    font-semibold
+    shadow-lg
+    hover:translate-x-1
+    "
+  >
+    👤 Usuarios
+  </Link>
+)}  
 
       </nav>
       <button

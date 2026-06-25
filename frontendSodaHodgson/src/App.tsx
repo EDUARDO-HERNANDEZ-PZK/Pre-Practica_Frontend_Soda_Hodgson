@@ -14,6 +14,7 @@ import Tables from "./pages/Tables";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
 import Cash from "./pages/Cash";
+import SalesHistory from "./pages/SalesHistory";
 interface LayoutProps {
   children: ReactNode;
 }
@@ -124,6 +125,16 @@ export default function App() {
     <ProtectedRoute>
       <Layout>
         <Cash />
+      </Layout>
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/sales-history"
+  element={
+    <ProtectedRoute>
+      <Layout>
+        <SalesHistory />
       </Layout>
     </ProtectedRoute>
   }
