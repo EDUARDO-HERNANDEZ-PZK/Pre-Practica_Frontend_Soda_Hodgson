@@ -200,7 +200,6 @@ const Sidebar: React.FC = () => {
     shadow-lg
     hover:translate-x-1
     "
-<<<<<<< HEAD
   >
     👤 Usuarios
   </Link>
@@ -222,12 +221,6 @@ const Sidebar: React.FC = () => {
 >
   🙍 Mi Perfil
 </Link>
-=======
-          >
-            👤 Usuarios
-          </Link>
-        )}
->>>>>>> be97bbb3b717f2be55c9a5bf3ac2c7f1b186f2e0
 
       </nav>
       <button
@@ -257,7 +250,7 @@ const Sidebar: React.FC = () => {
         🚪 Cerrar Sesión
 
       </button>
-      {/* FOOTER */}
+      {/* FOOTER */} 
 
       <div className="mt-12 border-t border-slate-700 pt-6">
 
@@ -270,7 +263,6 @@ const Sidebar: React.FC = () => {
         </p>
 
       </div>
-
     </aside>
   );
 };
