@@ -1,45 +1,21 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import SaleDetailModal from "./SaleDetailModal";
+import Sales from "../../../models/Sales";
 
-const SalesTable: React.FC = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const sales = [
-    {
-      id: 1,
-      invoice: "000001",
-      date: "25/06/2026",
-      table: "Mesa 1",
-      cashier: "Carlos",
-      total: "C$ 350.00",
-      status: "Pagada",
-    },
-    {
-      id: 2,
-      invoice: "000002",
-      date: "25/06/2026",
-      table: "Mesa 4",
-      cashier: "María",
-      total: "C$ 780.00",
-      status: "Pagada",
-    },
-    {
-      id: 3,
-      invoice: "000003",
-      date: "25/06/2026",
-      table: "Mesa 2",
-      cashier: "José",
-      total: "C$ 1,250.00",
-      status: "Anulada",
-    },
-  ];
+interface SalesTableProps {
+  salesData: Sales[];
+}
+
+const SalesTable: React.FC<SalesTableProps> = ({ salesData }) => {
+  // Guardamos el ID de la venta seleccionada para pasarlo al modal
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null);
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
       <table className="min-w-full">
         <thead className="bg-slate-800 text-white">
           <tr>
-            <th className="px-6 py-3 text-left">Factura</th>
+            <th className="px-6 py-3 text-left">Factura (ID)</th>
             <th className="px-6 py-3 text-left">Fecha</th>
             <th className="px-6 py-3 text-left">Mesa</th>
             <th className="px-6 py-3 text-left">Cajero</th>
@@ -50,59 +26,60 @@ const SalesTable: React.FC = () => {
         </thead>
 
         <tbody>
-          {sales.map((sale) => (
-            <tr
-              key={sale.id}
-              className="border-b hover:bg-gray-50 transition-colors"
-            >
-              <td className="px-6 py-4 font-medium">{sale.invoice}</td>
+          {salesData.map((sale) => {
+            // Convertir fecha de manera segura si viene como string de la API
+            const saleDate = new Date(sale.sale_time).toLocaleDateString("es-NI");
 
-              <td className="px-6 py-4">{sale.date}</td>
+            return (
+              <tr key={sale.id} className="border-b hover:bg-gray-50 transition-colors">
+                {/* Mostramos los primeros caracteres del ID como número de factura si es UUID */}
+                <td className="px-6 py-4 font-medium">
+                  {sale.id.slice(0, 6).toUpperCase()}
+                </td>
 
-              <td className="px-6 py-4">{sale.table}</td>
+                <td className="px-6 py-4">{saleDate}</td>
 
-              <td className="px-6 py-4">{sale.cashier}</td>
+                {/* Campos estáticos/relacionales de tu UI que dejas para desarrollo futuro */}
+                <td className="px-6 py-4">Mesa {sale.table_id || "1"}</td>
+                <td className="px-6 py-4">Cajero (ID: {sale.user_creator_id.slice(0,4)})</td>
+                
+                {/* Total estático temporal (hasta que asocies totales o detalles) */}
+                <td className="px-6 py-4 font-semibold text-green-600">
+                  C$ 350.00
+                </td>
 
-              <td className="px-6 py-4 font-semibold text-green-600">
-                {sale.total}
-              </td>
+                <td className="px-6 py-4 text-center">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      sale.status === "Pagada"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {sale.status || "Pagada"}
+                  </span>
+                </td>
 
-              <td className="px-6 py-4 text-center">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    sale.status === "Pagada"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {sale.status}
-                </span>
-              </td>
-
-              <td className="px-6 py-4 text-center">
-             <button
-  onClick={() => setOpenModal(true)}
-  className="
-    bg-cyan-600
-    hover:bg-cyan-700
-    text-white
-    px-4
-    py-2
-    rounded-lg
-    transition-all
-  "
->
-  👁 Ver
-</button>
-              </td>
-            </tr>
-          ))}
+                <td className="px-6 py-4 text-center">
+                  <button
+                    onClick={() => setSelectedSaleId(sale.id)}
+                    className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-all"
+                  >
+                    👁 Ver
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
+
+      {/* Modal de Detalle */}
       <SaleDetailModal
-  isOpen={openModal}
-  onClose={() => setOpenModal(false)}
-/>
+        isOpen={Boolean(selectedSaleId)}
+        saleId={selectedSaleId}
+        onClose={() => setSelectedSaleId(null)}
+      />
     </div>
   );
 };
