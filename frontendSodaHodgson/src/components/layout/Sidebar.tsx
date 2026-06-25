@@ -204,6 +204,23 @@ const Sidebar: React.FC = () => {
     👤 Usuarios
   </Link>
 )}  
+{/* Mi Perfil */}
+<Link
+  to="/profile"
+  className="
+  bg-slate-800
+  hover:bg-cyan-600
+  p-4
+  rounded-2xl
+  transition-all
+  duration-300
+  font-semibold
+  shadow-lg
+  hover:translate-x-1
+  "
+>
+  🙍 Mi Perfil
+</Link>
 
       </nav>
       <button
