@@ -1,12 +1,15 @@
 import DashboardHeader from "../components/layout/dashboard/DashboardHeader";
 import QuickActions from "../components/layout/dashboard/QuickActions";
 import StatsCards from "../components/layout/dashboard/StatsCards";
+import SalesChart from "../components/layout/dashboard/SalesChart";
+import TopProductsChart from "../components/layout/dashboard/TopProductsChart";
+import RecentActivity from "../components/layout/dashboard/RecentActivity";
+import SystemStatus from "../components/layout/dashboard/SystemStatus";
 import { useCashSessions } from "../hooks/useCashSession";
 import { useSales } from "../hooks/useSales";
 import { useSalesDetails } from "../hooks/useSalesDetail";
 import { useTables } from "../hooks/useTables";
 import {useProducts} from "../hooks/useProducts";
-import { Chart } from "primereact/chart";
 
 export default function Dashboard() {
   const { data: cashSessions = [] } = useCashSessions();
@@ -102,27 +105,25 @@ const salesChartData = {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
-  <div className="bg-white rounded-xl shadow p-6">
-    <h3 className="text-lg font-semibold mb-4">
-      Ventas por Día
-    </h3>
 
-    <Chart
-      type="line"
-      data={salesChartData}
-    />
-  </div>
+  <SalesChart
+    data={salesChartData}
+  />
 
-  <div className="bg-white rounded-xl shadow p-6">
-    <h3 className="text-lg font-semibold mb-4">
-      Top 5 Productos Más Vendidos
-    </h3>
+  <TopProductsChart
+    data={topProductsChartData}
+  />
 
-    <Chart
-      type="bar"
-      data={topProductsChartData}
-    />
-  </div>
+</div>
+
+{/* NUEVOS PANELES */}
+
+<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
+
+  <RecentActivity />
+
+  <SystemStatus user={user} />
+
 </div>
 
     </div>
