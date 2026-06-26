@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import Header from "../components/layout/Header";
 import { useReactToPrint } from "react-to-print";
 import Ticket from "../components/layout/Ticket";
+import POSHeader from "../components/layout/pos/POSHeader";
+import ProductGrid from "../components/layout/pos/ProductGrid";
+import Cart from "../components/layout/pos/Cart";
+import OrderSummary from "../components/layout/pos/OrderSummary";
 import { InvoiceDetail } from "../models/Cart";
 import { Product } from "../models/Product";
 import { orders } from "../data/orders";
@@ -11,6 +15,13 @@ import { useCreateSalesDetail } from "../hooks/useSalesDetail";
 import { useCreateSale } from "../hooks/useSales";
 import { Table } from "../models/Table";
 import { useSearchParams } from "react-router-dom";
+
+import {
+  ShoppingBag,
+  UtensilsCrossed,
+  CheckCircle2,
+} from "lucide-react";
+
 
 const POS: React.FC = () => {
   const createSale = useCreateSale();
@@ -60,11 +71,6 @@ const POS: React.FC = () => {
     cash: number;
     change: number;
   } | null>(null);
-
-  // FILTRAR PRODUCTOS
-  const filteredProducts = productList.filter((product) =>
-    (product.name ?? "").toLowerCase().includes(search.toLowerCase()),
-  );
 
   // AGREGAR PRODUCTO
   const addProduct = (product: Product) => {
@@ -237,184 +243,221 @@ const POS: React.FC = () => {
 
   return (
     <div className="p-4 md:p-8 w-full">
-      <Header title="Caja Registradora" />
+      
+      <POSHeader />
+
+<div className="mt-8"></div>
 
       {/* TIPO DE VENTA */}
-      <div className="bg-white rounded-3xl shadow-lg p-6 mb-8">
-        <h2 className="text-2xl font-bold mb-6">Tipo de Venta</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <button
-            onClick={() => {
-              setSaleType("RAPIDA");
-              setSelectedTable(null);
-            }}
-            className={`p-6 rounded-3xl border-2 transition text-left ${saleType === "RAPIDA"
-              ? "bg-blue-600 text-white border-blue-600"
-              : "bg-white border-slate-200 hover:border-blue-500"
-              }`}
-          >
-            <h3 className="text-2xl font-bold">🛍 Venta Rápida</h3>
-            <p className="mt-2">Cliente para llevar</p>
-          </button>
 
-          <button
-            onClick={() => setSaleType("MESA")}
-            className={`p-6 rounded-3xl border-2 transition text-left ${saleType === "MESA"
-              ? "bg-green-600 text-white border-green-600"
-              : "bg-white border-slate-200 hover:border-green-500"
-              }`}
-          >
-            <h3 className="text-2xl font-bold">🍽 Consumo en Mesa</h3>
-            <p className="mt-2">Cliente comerá en el restaurante</p>
-          </button>
-        </div>
+<div
+  className="
+    bg-white
+    rounded-[30px]
+    shadow-xl
+    border
+    border-slate-200
+    p-8
+    mb-8
+  "
+>
+
+  <div className="mb-8">
+
+    <h2 className="text-3xl font-black text-slate-800">
+      Tipo de Venta
+    </h2>
+
+    <p className="text-slate-500 mt-2">
+      Seleccione cómo desea registrar esta venta.
+    </p>
+
+  </div>
+
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    {/* Venta rápida */}
+
+    <button
+      onClick={() => {
+        setSaleType("RAPIDA");
+        setSelectedTable(null);
+      }}
+      className={`
+        relative
+        rounded-3xl
+        p-7
+        border-2
+        transition-all
+        duration-300
+        text-left
+        hover:-translate-y-1
+        hover:shadow-xl
+
+        ${
+          saleType === "RAPIDA"
+            ? "border-cyan-600 bg-gradient-to-br from-cyan-600 to-blue-700 text-white"
+            : "border-slate-200 bg-white"
+        }
+      `}
+    >
+
+      <div className="flex justify-between">
+
+        <ShoppingBag size={42} />
+
+        {saleType === "RAPIDA" && (
+          <CheckCircle2 size={30} />
+        )}
+
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8">
+        Venta Rápida
+      </h3>
+
+      <p className="mt-3 opacity-80">
+        Cliente para llevar.
+      </p>
+
+    </button>
+
+    {/* Mesa */}
+
+    <button
+      onClick={() => setSaleType("MESA")}
+      className={`
+        relative
+        rounded-3xl
+        p-7
+        border-2
+        transition-all
+        duration-300
+        text-left
+        hover:-translate-y-1
+        hover:shadow-xl
+
+        ${
+          saleType === "MESA"
+            ? "border-emerald-600 bg-gradient-to-br from-emerald-500 to-green-700 text-white"
+            : "border-slate-200 bg-white"
+        }
+      `}
+    >
+
+      <div className="flex justify-between">
+
+        <UtensilsCrossed size={42} />
 
         {saleType === "MESA" && (
-          <div className="mt-6">
-            <label className="font-semibold text-slate-700">
-              Seleccionar Mesa
-            </label>
-
-            <select
-              value={selectedTable?.table_number ?? ""}
-              onChange={(e) => {
-                const table = tables.find(
-                  (t) => t.table_number === Number(e.target.value)
-                );
-
-                setSelectedTable(table || null);
-              }}
-              className="w-full mt-3 p-4 border rounded-2xl"
-            >
-
-              <option value="">
-                Seleccionar Mesa
-              </option>
-
-              {availableTables.map((table) => (
-
-                <option
-                  key={table.id}
-                  value={table.table_number}
-                >
-                  Mesa {table.table_number} ({table.status})
-                </option>
-
-              ))}
-
-            </select>
-          </div>
+          <CheckCircle2 size={30} />
         )}
+
       </div>
 
-      {/* PRODUCTOS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
-        {filteredProducts.map((product) => (
-          <div key={product.id} className="bg-white rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-            <img
-              src={product.imageUrl || "https://user-images.githubusercontent.com/24848110/33519396-7e56363c-d79d-11e7-969b-09782f5ccbab.png"}
-              alt={product.name}
-              className="w-full h-52 object-cover"
-            />
-            <div className="p-5">
-              <h2 className="text-2xl font-bold">{product.name}</h2>
-              <p className="text-slate-500 mt-2">Stock: {product.stock_current}</p>
-              <h3 className="text-3xl font-bold mt-4">C$ {product.price_sell}</h3>
-              <button
-                onClick={() => addProduct(product)}
-                className={`w-full mt-5 p-3 rounded-2xl font-semibold transition ${product.stock_current <= 0 ? "bg-gray-400 cursor-not-allowed" : "bg-cyan-500 hover:bg-cyan-600 text-white"
-                  }`}
-                disabled={product.stock_current <= 0}
-              >
-                {product.stock_current <= 0 ? "Sin Stock" : "Agregar"}
-              </button>
-            </div>
-          </div>
+      <h3 className="text-2xl font-bold mt-8">
+        Consumo en Mesa
+      </h3>
+
+      <p className="mt-3 opacity-80">
+        Cliente comerá en el restaurante.
+      </p>
+
+    </button>
+
+  </div>
+
+  {saleType === "MESA" && (
+
+    <div className="mt-8">
+
+      <label className="font-semibold text-slate-700">
+        Seleccionar Mesa
+      </label>
+
+      <select
+        value={selectedTable?.table_number ?? ""}
+        onChange={(e) => {
+          const table = tables.find(
+            (t) =>
+              t.table_number === Number(e.target.value)
+          );
+
+          setSelectedTable(table || null);
+        }}
+        className="
+          w-full
+          mt-3
+          rounded-2xl
+          border
+          border-slate-300
+          p-4
+          text-lg
+          focus:ring-4
+          focus:ring-cyan-200
+          outline-none
+        "
+      >
+
+        <option value="">
+          Seleccione una mesa
+        </option>
+
+        {availableTables.map((table) => (
+
+          <option
+            key={table.id}
+            value={table.table_number}
+          >
+            Mesa {table.table_number} ({table.status})
+          </option>
+
         ))}
-      </div>
 
-      {/* CARRITO */}
-      <div className="bg-white rounded-3xl shadow-xl p-6 mt-8 border border-slate-100">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-800">Pedido Actual</h2>
-            <p className="text-slate-500 mt-1">
-              {saleType === "RAPIDA" ? "🛍 Venta para llevar" : `🍽 Consumo en Mesa ${selectedTable?.table_number ?? ""}`}
-            </p>
-          </div>
-          {saleType === "MESA" && selectedTable && (
-            <span className="bg-blue-100 text-blue-700 px-5 py-2 rounded-full font-semibold">
-              Mesa {selectedTable.table_number}
-            </span>
-          )}
-        </div>
+      </select>
 
-        <div className="overflow-x-auto rounded-2xl border border-slate-200">
-          <table className="w-full">
-            <thead className="bg-slate-100">
-              <tr>
-                <th className="p-4 text-left">Producto</th>
-                <th className="p-4 text-center">Cantidad</th>
-                <th className="p-4 text-center">Subtotal</th>
-                <th className="p-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cart.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="p-10 text-center text-slate-400">
-                    <div className="text-5xl mb-3">🛒</div>
-                    No hay productos agregados
-                  </td>
-                </tr>
-              ) : (
-                cart.map((item) => (
-                  <tr key={item.id} className="border-t hover:bg-slate-50 transition">
-                    <td className="p-4 font-semibold">{item.product.name}</td>
-                    <td className="p-4 text-center">
-                      <span className="bg-slate-100 px-3 py-1 rounded-full font-bold">{item.quantity}</span>
-                    </td>
-                    <td className="p-4 text-center font-bold text-green-700">C$ {item.subtotal}</td>
-                    <td className="p-4">
-                      <div className="flex justify-center gap-2">
-                        <button onClick={() => addProduct(item.product)} className="w-10 h-10 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold transition">+</button>
-                        <button onClick={() => removeProduct(item.id)} className="w-10 h-10 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition">−</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    </div>
 
-      {/* RESUMEN DEL PEDIDO */}
-      <div className="mt-8 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 shadow-2xl">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div>
-            <p className="text-slate-300 uppercase tracking-widest text-sm">Resumen del Pedido</p>
-            <h2 className="text-5xl font-extrabold text-white mt-2">C$ {total}</h2>
-            <div className="flex flex-wrap gap-3 mt-4">
-              <span className="bg-white/10 text-white px-4 py-2 rounded-full text-sm">{cart.length} Productos</span>
-              <span className="bg-emerald-500/20 text-emerald-300 px-4 py-2 rounded-full text-sm">
-                {saleType === "RAPIDA" ? "🛍 Para Llevar" : `🍽 Mesa ${selectedTable?.table_number ?? ""}`}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button onClick={() => setCart([])} className="px-6 py-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold transition">🗑 Vaciar Pedido</button>
-            <button
-              onClick={() => setShowModal(true)}
-              disabled={cart.length === 0}
-              className={`px-10 py-4 rounded-2xl font-bold text-lg transition ${cart.length === 0 ? "bg-slate-500 cursor-not-allowed text-white" : "bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:scale-105"
-                }`}
-            >
-              💳 Cobrar
-            </button>
-          </div>
-        </div>
-      </div>
+  )}
+
+</div>
+<div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+
+  {/* PRODUCTOS */}
+  <div className="xl:col-span-3">
+
+    <ProductGrid
+      products={productList}
+      search={search}
+      onSearch={setSearch}
+      onAdd={addProduct}
+    />
+
+  </div>
+
+  {/* PEDIDO */}
+  <div className="xl:col-span-2 space-y-6">
+
+    <Cart
+      cart={cart}
+      saleType={saleType}
+      selectedTable={selectedTable}
+      addProduct={addProduct}
+      removeProduct={removeProduct}
+    />
+
+    <OrderSummary
+      total={total}
+      cartLength={cart.length}
+      saleType={saleType}
+      selectedTable={selectedTable}
+      onCheckout={() => setShowModal(true)}
+      onClear={() => setCart([])}
+    />
+
+  </div>
+
+</div>
 
       {/* MODAL DE COBRO */}
       {showModal && (
