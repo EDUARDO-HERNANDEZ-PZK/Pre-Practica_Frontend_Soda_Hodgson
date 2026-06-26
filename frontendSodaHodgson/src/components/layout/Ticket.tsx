@@ -40,10 +40,10 @@ const Ticket: React.FC<TicketProps> = ({
           <div key={item.id} className="flex justify-between mb-3">
             <div>
               <p className="font-semibold">{item.product.name}</p>
-
               <p className="text-sm text-slate-500">
-                {item.quantity} x C$ {item.product.price}
-              </p>
+  {item.quantity} x C$ {item.product.price_sell}
+</p>
+
             </div>
 
             <p className="font-bold">C$ {item.subtotal}</p>

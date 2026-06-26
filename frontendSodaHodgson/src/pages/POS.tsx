@@ -15,6 +15,8 @@ import { useCreateSalesDetail } from "../hooks/useSalesDetail";
 import { useCreateSale } from "../hooks/useSales";
 import { Table } from "../models/Table";
 import { useSearchParams } from "react-router-dom";
+import { useRef } from "react";
+
 
 import {
   ShoppingBag,
@@ -37,6 +39,7 @@ const POS: React.FC = () => {
   const [saleType, setSaleType] = useState<"RAPIDA" | "MESA">("RAPIDA");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const ticketRef = useRef<HTMLDivElement>(null);
 
   // 🚀 MEJORA: El estado nace como un string vacío para permitir el placeholder transparente
   const [cash, setCash] = useState<string>("");
@@ -140,10 +143,6 @@ const POS: React.FC = () => {
   // 🚀 MEJORA: Cálculo seguro del cambio convirtiendo el string 'cash' a número real
   const change = cash ? Number(cash) - total : 0 - total;
 
-  const handlePrint = () => {
-    setShowTicket(true);
-  };
-
   // FINALIZAR VENTA
   const finishSale = async () => {
     if (!cash || Number(cash) <= 0) {
@@ -172,19 +171,6 @@ const POS: React.FC = () => {
         status: "COMPLETED",
       });
 
-      await Promise.all(
-        cart.map((item) =>
-          createSalesDetail.mutateAsync({
-            sale_id: sale.id,
-            product_id: item.product.id,
-            quantity: item.quantity,
-            unit_price: item.product.price_sell,
-            subtotal: item.subtotal,
-          })
-        )
-      );
-
-      // 2. Crear detalles
       await Promise.all(
         cart.map((item) =>
           createSalesDetail.mutateAsync({
@@ -236,6 +222,10 @@ const POS: React.FC = () => {
       table.status === "Disponible" ||
       table.status === "Reservada"
   );
+  const handlePrint = useReactToPrint({
+  contentRef: ticketRef,
+  documentTitle: "Factura Soda Hodgson",
+});
 
   useEffect(() => {
     loadProducts();
@@ -533,18 +523,53 @@ const POS: React.FC = () => {
       )}
 
       {/* VISUALIZACIÓN DEL TICKET */}
-      {showTicket && ticketData && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 max-h-[90vh] overflow-y-auto relative">
-            <button onClick={() => setShowTicket(false)} className="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full font-bold hover:bg-red-600">X</button>
-            <Ticket cart={ticketData.cart} total={ticketData.total} paymentMethod={ticketData.paymentMethod} cash={ticketData.cash} change={ticketData.change} />
-            <div className="flex gap-4 mt-6">
-              <button onClick={() => window.print()} className="bg-blue-600 text-white w-full p-4 rounded-2xl font-bold hover:bg-blue-700">Imprimir</button>
-              <button onClick={() => setShowTicket(false)} className="bg-slate-300 w-full p-4 rounded-2xl font-bold">Cerrar</button>
-            </div>
-          </div>
-        </div>
-      )}
+{showTicket && ticketData && (
+  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+    <div className="bg-white rounded-3xl shadow-2xl p-8 relative">
+
+      <button
+        onClick={() => setShowTicket(false)}
+        className="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full font-bold hover:bg-red-600"
+      >
+        X
+      </button>
+
+      <div
+        id="ticket-print"
+        ref={ticketRef}
+      >
+        <Ticket
+          cart={ticketData.cart}
+          total={ticketData.total}
+          paymentMethod={ticketData.paymentMethod}
+          cash={ticketData.cash}
+          change={ticketData.change}
+        />
+      </div>
+
+      <div className="flex gap-4 mt-6">
+
+        <button
+          onClick={handlePrint}
+          className="bg-blue-600 text-white w-full p-4 rounded-2xl font-bold hover:bg-blue-700"
+        >
+          Imprimir
+        </button>
+
+        <button
+          onClick={() => setShowTicket(false)}
+          className="bg-slate-300 w-full p-4 rounded-2xl font-bold"
+        >
+          Cerrar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
     </div>
   );
 };
