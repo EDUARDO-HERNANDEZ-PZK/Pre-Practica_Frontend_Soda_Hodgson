@@ -64,6 +64,21 @@ const totalsBySale = salesDetails.reduce((acc, detail) => {
   return acc;
 }, {});
 
+const recentSales = [...sales]
+  .sort(
+    (a, b) =>
+      new Date(b.sale_time).getTime() -
+      new Date(a.sale_time).getTime()
+  )
+  .slice(0, 5)
+  .map((sale) => ({
+    id: sale.id,
+    table: sale.table_id,
+    total: totalsBySale[sale.id] || 0,
+    date: sale.sale_time,
+    status: sale.status,
+  }));
+
 const salesByDay = sales.reduce((acc, sale) => {
   const date = new Date(sale.sale_time)
     .toLocaleDateString();
@@ -120,9 +135,16 @@ const salesChartData = {
 
 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-8">
 
-  <RecentActivity />
+  <RecentActivity
+    sales={recentSales}
+/>
 
-  <SystemStatus user={user} />
+  <SystemStatus
+  user={user}
+  tables={tables}
+  products={initialProducts}
+  sales={facturas}
+/>
 
 </div>
 
